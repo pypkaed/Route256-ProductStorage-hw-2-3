@@ -1,5 +1,6 @@
 using FluentValidation;
 using Products.Repositories;
+using Products.Services;
 
 namespace Products;
 
@@ -15,6 +16,7 @@ public class Program
         
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
         builder.Services.AddScoped<IProductRepository, ProductInMemoryRepository>();
+        builder.Services.AddScoped<IProductService, ProductService>();
 
         var app = builder.Build();
 
