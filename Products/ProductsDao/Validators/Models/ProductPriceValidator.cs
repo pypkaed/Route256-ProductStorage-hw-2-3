@@ -1,7 +1,7 @@
 using FluentValidation;
-using Products.Models;
+using ProductsDao.Models;
 
-namespace Products.Validators.Models;
+namespace ProductsDao.Validators.Models;
 
 public class ProductPriceValidator : AbstractValidator<ProductPrice>
 {

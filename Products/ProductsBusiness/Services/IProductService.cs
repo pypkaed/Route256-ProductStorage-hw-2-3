@@ -1,8 +1,4 @@
-using Products.Entities;
-using Products.Models;
-using Products.Requests;
-
-namespace Products.Services;
+namespace ProductsBusiness.Services;
 
 public interface IProductService
 {

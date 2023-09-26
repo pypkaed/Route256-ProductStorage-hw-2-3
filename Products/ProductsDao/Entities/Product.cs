@@ -1,6 +1,6 @@
-using Products.Models;
+using ProductsDao.Models;
 
-namespace Products.Entities;
+namespace ProductsDao.Entities;
 
 public class Product : IEquatable<Product>
 {

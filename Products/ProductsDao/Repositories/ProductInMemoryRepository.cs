@@ -1,7 +1,7 @@
-using Products.Entities;
-using Products.Models;
+using ProductsDao.Entities;
+using ProductsDao.Models;
 
-namespace Products.Repositories;
+namespace ProductsDao.Repositories;
 
 public class ProductInMemoryRepository : IProductRepository
 {

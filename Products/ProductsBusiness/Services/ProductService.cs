@@ -1,9 +1,6 @@
-using Products.Entities;
-using Products.Models;
-using Products.Repositories;
-using Products.Requests;
+using ProductsDao.Repositories;
 
-namespace Products.Services;
+namespace ProductsBusiness.Services;
 
 public class ProductService : IProductService
 {

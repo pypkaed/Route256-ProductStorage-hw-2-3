@@ -1,3 +1,3 @@
-namespace Products.Models;
+namespace ProductsDao.Models;
 
 public record WarehouseId(long Id);

@@ -4,6 +4,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <RootNamespace>Products</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -14,7 +15,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="GrpcServices\" />
       <Folder Include="Interceptors\" />
       <Folder Include="Profiles\" />
       <Folder Include="Proto\" />
