@@ -1,4 +1,5 @@
 using FluentValidation;
+using Products.Repositories;
 
 namespace Products;
 
@@ -11,8 +12,9 @@ public class Program
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+        
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
-
+        builder.Services.AddScoped<IProductRepository, ProductInMemoryRepository>();
 
         var app = builder.Build();
 
