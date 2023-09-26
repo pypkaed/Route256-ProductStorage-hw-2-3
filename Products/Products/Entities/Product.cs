@@ -2,7 +2,7 @@ using Products.Models;
 
 namespace Products.Entities;
 
-public class Product
+public class Product : IEquatable<Product>
 {
     public Product(
         ProductId id,
@@ -29,4 +29,19 @@ public class Product
     public ProductCategory Category { get; }
     public DateTime ManufactureDate { get; init; }
     public WarehouseId WarehouseId { get; }
+
+    public bool Equals(Product? other)
+    {
+        return Id.Equals(other?.Id);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return Equals(obj as Product);
+    }
+
+    public override int GetHashCode()
+    {
+        return Id.GetHashCode();
+    }
 }
