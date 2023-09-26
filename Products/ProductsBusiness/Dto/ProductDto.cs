@@ -1,6 +1,6 @@
 using ProductsDao.Models;
 
-namespace ProductsDao.Dto;
+namespace ProductsBusiness.Dto;
 
 public record ProductDto(
     ProductId Id,

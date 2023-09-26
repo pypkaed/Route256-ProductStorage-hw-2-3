@@ -1,5 +1,6 @@
 using FluentValidation;
-using ProductsBusiness.Services;
+using ProductsBusiness;
+using ProductsBusiness.Extensions;
 using ProductsDao.Extensions;
 
 namespace Products;

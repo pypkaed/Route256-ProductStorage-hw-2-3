@@ -1,8 +1,8 @@
 using AutoMapper;
-using ProductsDao.Dto;
+using ProductsBusiness.Dto;
 using ProductsDao.Entities;
 
-namespace ProductsDao.Profiles;
+namespace ProductsBusiness.Profiles;
 
 public class ProductProfile : Profile
 {
