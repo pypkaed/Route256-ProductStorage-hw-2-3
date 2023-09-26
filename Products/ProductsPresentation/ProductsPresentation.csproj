@@ -20,4 +20,8 @@
       <Folder Include="Proto\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\ProductsBusiness\ProductsBusiness.csproj" />
+    </ItemGroup>
+
 </Project>

@@ -1,6 +1,6 @@
 using FluentValidation;
-using Products.Repositories;
-using Products.Services;
+using ProductsBusiness.Services;
+using ProductsDao.Extensions;
 
 namespace Products;
 
@@ -11,12 +11,12 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddControllers();
+        builder.Services.AddDao();
+        builder.Services.AddBusiness();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-        
+
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
-        builder.Services.AddScoped<IProductRepository, ProductInMemoryRepository>();
-        builder.Services.AddScoped<IProductService, ProductService>();
 
         var app = builder.Build();
 
