@@ -9,7 +9,7 @@ public static class ServiceCollectionExtension
     public static IServiceCollection AddDao(
         this IServiceCollection collection)
     {
-        collection.AddScoped<IProductRepository, ProductInMemoryRepository>();
+        collection.AddSingleton<IProductRepository, ProductInMemoryRepository>();
 
         return collection;
     }
