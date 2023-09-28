@@ -1,7 +1,6 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using ProductsDao.Repositories;
-using ProductsDao.Validators.Entities;
 
 namespace ProductsDao.Extensions;
 
@@ -11,7 +10,6 @@ public static class ServiceCollectionExtension
         this IServiceCollection collection)
     {
         collection.AddScoped<IProductRepository, ProductInMemoryRepository>();
-        collection.AddValidatorsFromAssembly(typeof(ProductValidator).Assembly);
 
         return collection;
     }

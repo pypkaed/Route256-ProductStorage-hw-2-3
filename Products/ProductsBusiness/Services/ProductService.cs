@@ -36,7 +36,7 @@ public class ProductService : IProductService
         if (!Enum.TryParse<ProductCategory>(category, ignoreCase: true, out var productCategory))
         {
             // TODO: exception
-            throw new Exception();
+            throw new Exception("enum parsing stuff");
         }
 
         var product = new Product(

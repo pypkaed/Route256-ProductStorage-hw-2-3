@@ -3,7 +3,6 @@ using ProductsBusiness.Extensions;
 using ProductsBusiness.Services;
 using ProductsDao.Extensions;
 using ProductsDao.Repositories;
-using ProductsDao.Validators.Entities;
 
 namespace Products;
 
