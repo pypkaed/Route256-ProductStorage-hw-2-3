@@ -1,6 +1,4 @@
 using ProductsBusiness.Dto;
-using ProductsDao.Entities;
-using ProductsDao.Models;
 
 namespace ProductsBusiness.Services;
 
@@ -14,8 +12,8 @@ public interface IProductService
         string category,
         DateTime manufactureDate,
         long warehouseId);
-    ProductDto GetProductById(ProductId productId);
-    void DeleteProductById(ProductId productId);
-    ProductDto UpdateProductPrice(ProductId productId, ProductPrice productPrice);
+    ProductDto GetProductById(long id);
+    void DeleteProductById(long id);
+    ProductDto UpdateProductPrice(long id, decimal price);
     // List<ProductDto> GetProductsFiltered(FilteredRequest filters);
 }

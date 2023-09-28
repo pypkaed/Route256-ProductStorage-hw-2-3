@@ -47,25 +47,31 @@ public class ProductService : IProductService
             productCategory,
             manufactureDate,
             warehouseIdModel);
+        
         _repository.Insert(product);
 
         return _mapper.Map<ProductDto>(product);
     }
 
-    public ProductDto GetProductById(ProductId productId)
+    public ProductDto GetProductById(long id)
     {
+        var productId = new ProductId(id);
         var product = _repository.GetById(productId);
         
         return _mapper.Map<ProductDto>(product);
     }
 
-    public void DeleteProductById(ProductId productId)
+    public void DeleteProductById(long id)
     {
+        var productId = new ProductId(id);
         _repository.DeleteById(productId);
     }
 
-    public ProductDto UpdateProductPrice(ProductId productId, ProductPrice productPrice)
+    public ProductDto UpdateProductPrice(long id, decimal price)
     {
+        var productId = new ProductId(id);
+        var productPrice = new ProductPrice(price);
+
         var product = _repository.GetById(productId);
         product.ChangePrice(productPrice);
         

@@ -1,4 +1,5 @@
 using FluentValidation;
+using Products.Validators;
 using ProductsBusiness.Extensions;
 using ProductsBusiness.Services;
 using ProductsDao.Extensions;
@@ -20,6 +21,7 @@ public class Program
 
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
         builder.Services.AddAutoMapper(typeof(Program));
+        builder.Services.AddScoped<RequestValidator>();
 
         var app = builder.Build();
 

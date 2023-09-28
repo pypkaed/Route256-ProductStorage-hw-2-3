@@ -27,9 +27,10 @@ public class ProductController
 
     [HttpPost]
     [Route("[action]")]
-    public CreateProductResponse CreateProduct([FromBody] CreateProductRequest request)
+    public ProductResponse CreateProduct([FromBody] CreateProductRequest request)
     {
         _validator.Validate(request);
+        
         var productDto = _service.CreateProduct(
             request.Id,
             request.Name,
@@ -38,8 +39,43 @@ public class ProductController
             request.Category,
             request.ManufactureDate,
             request.WarehouseId);
-        var response = _mapper.Map<CreateProductResponse>(productDto);
         
+        var response = _mapper.Map<ProductResponse>(productDto);
+        return response;
+    }
+    
+    [HttpPost]
+    [Route("[action]")]
+    public ProductResponse GetProductById([FromBody] GetProductByIdRequest request)
+    {
+        _validator.Validate(request);
+        
+        var productDto = _service.GetProductById(request.ProductId);
+
+        var response = _mapper.Map<ProductResponse>(productDto);
+        return response;
+    }  
+    
+    [HttpDelete]
+    [Route("[action]")]
+    public DeleteProductByIdResponse DeleteProductById([FromBody] DeleteProductByIdRequest request)
+    {
+        _validator.Validate(request);
+        
+        _service.DeleteProductById(request.ProductId);
+
+        return new DeleteProductByIdResponse();
+    }
+    
+    [HttpPut]
+    [Route("[action]")]
+    public ProductResponse UpdateProductPrice([FromBody] UpdateProductPriceRequest request)
+    {
+        _validator.Validate(request);
+        
+        var productDto = _service.UpdateProductPrice(request.ProductId, request.NewPrice);
+
+        var response = _mapper.Map<ProductResponse>(productDto);
         return response;
     }
     

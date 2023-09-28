@@ -8,7 +8,6 @@ public class ResponseProfile : Profile
 {
     public ResponseProfile()
     {
-        CreateMap<ProductDto, CreateProductResponse>();
-        CreateMap<CreateProductResponse, ProductDto>();
+        CreateMap<ProductDto, ProductResponse>();
     }
 }

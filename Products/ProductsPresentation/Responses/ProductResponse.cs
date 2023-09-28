@@ -1,6 +1,6 @@
 namespace Products.Responses;
 
-public record CreateProductResponse(
+public record ProductResponse(
     long Id,
     string Name,
     decimal Price,
