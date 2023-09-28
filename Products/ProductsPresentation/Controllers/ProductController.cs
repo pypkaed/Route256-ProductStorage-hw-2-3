@@ -75,10 +75,16 @@ public class ProductController
         return response;
     }
     
-    // [HttpPost]
-    // [Route("[action]")]
-    // public async Task<string> Test([FromBody] FilteredRequest filters)
-    // {
-    //     return "Bebra!";
-    // }
+    [HttpPost]
+    [Route("[action]")]
+    public GetProductsFilteredResponse GetProductsFiltered([FromBody] GetProductsFilteredRequest filters)
+    {
+        var filtersDto = _mapper.Map<FiltersDto>(filters);
+        
+        var result = _service.GetProductsFiltered(filtersDto);
+        var productResponses = _mapper.Map<List<ProductResponse>>(result);
+
+        var response = _mapper.Map<GetProductsFilteredResponse>(productResponses);
+        return response;
+    }
 }

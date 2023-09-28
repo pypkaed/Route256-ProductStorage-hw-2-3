@@ -1,5 +1,7 @@
 using AutoMapper;
 using ProductsBusiness.Dto;
+using ProductsBusiness.Filters;
+using ProductsBusiness.Profiles;
 using ProductsDao.Entities;
 using ProductsDao.Models;
 using ProductsDao.Repositories;
@@ -21,26 +23,6 @@ public class ProductService : IProductService
 
     public ProductDto CreateProduct(ProductDto productDto)
     {
-        // var productId = new ProductId(id);
-        // var productName = new ProductName(name);
-        // var productPrice = new ProductPrice(price);
-        // var productWeight = new ProductWeight(weight);
-        // var warehouseIdModel = new WarehouseId(warehouseId);
-        // if (!Enum.TryParse<ProductCategory>(category, ignoreCase: true, out var productCategory))
-        // {
-        //     // TODO: exception
-        //     throw new Exception("enum parsing stuff");
-        // }
-
-        // var product = new Product(
-        //     productId,
-        //     productName,
-        //     productPrice,
-        //     productWeight,
-        //     productCategory,
-        //     manufactureDate,
-        //     warehouseIdModel);
-
         var product = _mapper.Map<Product>(productDto);
         
         _repository.Insert(product);
@@ -73,5 +55,17 @@ public class ProductService : IProductService
         _repository.Update(product);
         
         return _mapper.Map<ProductDto>(product);
+    }
+
+    public List<ProductDto> GetProductsFiltered(FiltersDto filtersDto)
+    {
+        var filterChain = filtersDto.AsProductFilterChain();
+
+        var products = _repository.GetAll();
+        var filteredProducts = filterChain.Apply(products);
+
+        var result = filteredProducts.Select(p => _mapper.Map<ProductDto>(p));
+
+        return result.ToList();
     }
 }

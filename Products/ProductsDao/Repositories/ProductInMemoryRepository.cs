@@ -42,10 +42,16 @@ public class ProductInMemoryRepository : IProductRepository
         var product = FindProductById(productId);
         if (product is null)
         {
+            // TODO: excption
             throw new Exception($"Product with id {productId} does not exist.");
         }
 
         return product;
+    }
+
+    public IReadOnlyCollection<Product> GetAll()
+    {
+        return _products.AsReadOnly();
     }
 
     private Product? FindProductById(ProductId productId)

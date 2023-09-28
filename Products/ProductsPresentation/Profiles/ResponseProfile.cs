@@ -9,5 +9,6 @@ public class ResponseProfile : Profile
     public ResponseProfile()
     {
         CreateMap<ProductDto, ProductResponse>();
+        CreateMap<List<ProductDto>, GetProductsFilteredResponse>();
     }
 }

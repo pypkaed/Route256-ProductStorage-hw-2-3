@@ -9,5 +9,5 @@ public interface IProductService
     ProductDto GetProductById(long id);
     void DeleteProductById(long id);
     ProductDto UpdateProductPrice(long id, decimal price);
-    // List<ProductDto> GetProductsFiltered(List<ProductFilter> filters);
+    List<ProductDto> GetProductsFiltered(FiltersDto filtersDto);
 }

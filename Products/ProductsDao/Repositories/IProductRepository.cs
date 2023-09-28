@@ -9,4 +9,5 @@ public interface IProductRepository
     void DeleteById(ProductId productId);
     Product Update(Product product);
     Product GetById(ProductId productId);
+    IReadOnlyCollection<Product> GetAll();
 }
