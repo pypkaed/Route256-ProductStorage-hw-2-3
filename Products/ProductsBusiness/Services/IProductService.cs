@@ -10,7 +10,7 @@ public interface IProductService
         decimal price,
         double weight,
         string category,
-        DateTime manufactureDate,
+        DateOnly manufactureDate,
         long warehouseId);
     ProductDto GetProductById(long id);
     void DeleteProductById(long id);

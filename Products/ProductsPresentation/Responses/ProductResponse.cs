@@ -6,5 +6,5 @@ public record ProductResponse(
     decimal Price,
     double Weight,
     string Category,
-    DateTime ManufactureDate,
+    DateOnly ManufactureDate,
     long WarehouseId);

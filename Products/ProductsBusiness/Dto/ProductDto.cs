@@ -6,5 +6,5 @@ public record ProductDto(
     decimal Price,
     double Weight,
     string Category,
-    DateTime ManufactureDate,
+    DateOnly ManufactureDate,
     long WarehouseId);

@@ -1,4 +1,3 @@
-using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using ProductsDao.Repositories;
 

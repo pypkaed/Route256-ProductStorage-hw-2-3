@@ -25,7 +25,7 @@ public class ProductService : IProductService
         decimal price,
         double weight,
         string category,
-        DateTime manufactureDate,
+        DateOnly manufactureDate,
         long warehouseId)
     {
         var productId = new ProductId(id);

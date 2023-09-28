@@ -10,7 +10,7 @@ public class Product : IEquatable<Product>
         ProductPrice price,
         ProductWeight weight,
         ProductCategory category,
-        DateTime manufactureDate,
+        DateOnly manufactureDate,
         WarehouseId warehouseId)
     {
         Id = id;
@@ -27,7 +27,7 @@ public class Product : IEquatable<Product>
     public ProductPrice Price { get; private set; }
     public ProductWeight Weight { get; }
     public ProductCategory Category { get; }
-    public DateTime ManufactureDate { get; init; }
+    public DateOnly ManufactureDate { get; init; }
     public WarehouseId WarehouseId { get; }
 
     public void ChangePrice(ProductPrice newPrice)
