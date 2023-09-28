@@ -1,6 +1,5 @@
 using AutoMapper;
 using ProductsBusiness.Dto;
-using ProductsBusiness.Filters;
 using ProductsBusiness.Profiles;
 using ProductsDao.Entities;
 using ProductsDao.Models;
@@ -67,5 +66,12 @@ public class ProductService : IProductService
         var result = filteredProducts.Select(p => _mapper.Map<ProductDto>(p));
 
         return result.ToList();
+    }
+
+    public List<ProductDto> GetPage(int pageNum, int pageLength, List<ProductDto> products)
+    {
+        var skipPagesNum = (pageNum - 1) * pageLength;
+        
+        return products.Skip(skipPagesNum).Take(pageLength).ToList();
     }
 }

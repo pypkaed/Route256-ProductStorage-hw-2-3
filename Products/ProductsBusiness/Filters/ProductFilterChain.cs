@@ -4,6 +4,8 @@ namespace ProductsBusiness.Filters;
 
 public class ProductFilterChain
 {
+    private const int FirstFilterIndex = 0;
+    
     private readonly List<ProductFilter> _filters;
 
     public ProductFilterChain(List<ProductFilter> filters)
@@ -19,6 +21,6 @@ public class ProductFilterChain
 
     public IEnumerable<Product> Apply(IEnumerable<Product> products)
     {
-        return _filters.Count == 0 ? products : _filters[0].Apply(products);
+        return _filters.Count == 0 ? products : _filters[FirstFilterIndex].Apply(products);
     }
 }

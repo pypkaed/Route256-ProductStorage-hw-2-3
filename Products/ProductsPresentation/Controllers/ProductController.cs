@@ -77,12 +77,17 @@ public class ProductController
     
     [HttpPost]
     [Route("[action]")]
-    public GetProductsFilteredResponse GetProductsFiltered([FromBody] GetProductsFilteredRequest filters)
+    public GetProductsFilteredResponse GetProductsFiltered(
+        [FromBody] GetProductsFilteredRequest filters,
+        [FromQuery] PaginationRequest pagination)
     {
         var filtersDto = _mapper.Map<FiltersDto>(filters);
         
-        var result = _service.GetProductsFiltered(filtersDto);
-        var productResponses = _mapper.Map<List<ProductResponse>>(result);
+        var filteredResult = _service.GetProductsFiltered(filtersDto);
+
+        var page = _service.GetPage(pagination.PageNumber, pagination.PageLength, filteredResult);
+        
+        var productResponses = _mapper.Map<List<ProductResponse>>(page);
 
         var response = _mapper.Map<GetProductsFilteredResponse>(productResponses);
         return response;

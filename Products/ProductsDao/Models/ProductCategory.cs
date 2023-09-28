@@ -3,7 +3,7 @@ namespace ProductsDao.Models;
 public enum ProductCategory
 {
     Food,
-    Technology,
+    Electronics,
     Chemicals,
     Other
 }
