@@ -1,7 +1,9 @@
 using FluentValidation;
-using ProductsBusiness;
 using ProductsBusiness.Extensions;
+using ProductsBusiness.Services;
 using ProductsDao.Extensions;
+using ProductsDao.Repositories;
+using ProductsDao.Validators.Entities;
 
 namespace Products;
 
@@ -18,6 +20,7 @@ public class Program
         builder.Services.AddSwaggerGen();
 
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+        builder.Services.AddAutoMapper(typeof(Program));
 
         var app = builder.Build();
 

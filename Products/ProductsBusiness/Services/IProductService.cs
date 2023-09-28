@@ -7,13 +7,13 @@ namespace ProductsBusiness.Services;
 public interface IProductService
 {
     ProductDto CreateProduct(
-        ProductId id,
-        ProductName name,
-        ProductPrice price,
-        ProductWeight weight,
-        ProductCategory category,
+        long id,
+        string name,
+        decimal price,
+        double weight,
+        string category,
         DateTime manufactureDate,
-        WarehouseId warehouseId);
+        long warehouseId);
     ProductDto GetProductById(ProductId productId);
     void DeleteProductById(ProductId productId);
     ProductDto UpdateProductPrice(ProductId productId, ProductPrice productPrice);

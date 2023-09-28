@@ -1,12 +1,10 @@
-using ProductsDao.Models;
-
 namespace ProductsBusiness.Dto;
 
 public record ProductDto(
-    ProductId Id,
-    ProductName Name,
-    ProductPrice Price,
-    ProductWeight Weight,
-    ProductCategory Category,
+    long Id,
+    string Name,
+    decimal Price,
+    double Weight,
+    string Category,
     DateTime ManufactureDate,
-    WarehouseId WarehouseId);
+    long WarehouseId);

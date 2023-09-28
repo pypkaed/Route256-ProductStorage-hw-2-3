@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using ProductsBusiness.Services;
 
@@ -9,6 +10,8 @@ public static class ServiceCollectionExtension
         this IServiceCollection collection)
     {
         collection.AddScoped<IProductService, ProductService>();
+        collection.AddValidatorsFromAssemblyContaining<IProductService>(); 
+        collection.AddAutoMapper(typeof(IProductService));
 
         return collection;
     }

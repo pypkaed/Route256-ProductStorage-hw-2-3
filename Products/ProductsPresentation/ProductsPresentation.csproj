@@ -9,15 +9,16 @@
 
     <ItemGroup>
       <PackageReference Include="AutoMapper" Version="12.0.1" />
+      <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
       <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+      <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.7.1" />
       <PackageReference Include="Grpc.AspNetCore" Version="2.57.0" />
       <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="GrpcServices\" />
       <Folder Include="Interceptors\" />
-      <Folder Include="Profiles\" />
-      <Folder Include="Proto\" />
     </ItemGroup>
 
     <ItemGroup>

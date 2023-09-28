@@ -1,4 +1,3 @@
-using AutoMapper;
 using ProductsDao.Entities;
 using ProductsDao.Models;
 
@@ -6,15 +5,20 @@ namespace ProductsDao.Repositories;
 
 public class ProductInMemoryRepository : IProductRepository
 {
-    private readonly HashSet<Product> _products;
+    private readonly List<Product> _products;
 
-    public ProductInMemoryRepository(HashSet<Product> products)
+    public ProductInMemoryRepository()
     {
-        _products = products;
+        _products = new List<Product>();
     }
 
     public Product Insert(Product product)
     {
+        if (_products.Contains(product))
+        {
+            // TODO: execpton
+            throw new Exception("product already exists");
+        }
         _products.Add(product);
         return product;
     }
