@@ -16,5 +16,9 @@ public class ProductProfile : Profile
         CreateMap<ProductCategory, string>().ConstructUsing(input => input.ToString());
         CreateMap<WarehouseId, long>().ConstructUsing(input => input.Id);
         CreateMap<Product, ProductDto>();
+        
+        
+        CreateMap<string, ProductCategory>().ConstructUsing(input => Enum.Parse<ProductCategory>(input));
+        CreateMap<ProductDto, Product>();
     }
 }

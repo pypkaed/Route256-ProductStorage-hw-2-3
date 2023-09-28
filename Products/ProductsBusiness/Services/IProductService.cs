@@ -1,19 +1,13 @@
 using ProductsBusiness.Dto;
+using ProductsBusiness.Filters;
 
 namespace ProductsBusiness.Services;
 
 public interface IProductService
 {
-    ProductDto CreateProduct(
-        long id,
-        string name,
-        decimal price,
-        double weight,
-        string category,
-        DateOnly manufactureDate,
-        long warehouseId);
+    ProductDto CreateProduct(ProductDto productDto);
     ProductDto GetProductById(long id);
     void DeleteProductById(long id);
     ProductDto UpdateProductPrice(long id, decimal price);
-    // List<ProductDto> GetProductsFiltered(FilteredRequest filters);
+    // List<ProductDto> GetProductsFiltered(List<ProductFilter> filters);
 }

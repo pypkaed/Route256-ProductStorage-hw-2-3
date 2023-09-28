@@ -19,34 +19,29 @@ public class ProductService : IProductService
         _mapper = mapper;
     }
 
-    public ProductDto CreateProduct(
-        long id,
-        string name,
-        decimal price,
-        double weight,
-        string category,
-        DateOnly manufactureDate,
-        long warehouseId)
+    public ProductDto CreateProduct(ProductDto productDto)
     {
-        var productId = new ProductId(id);
-        var productName = new ProductName(name);
-        var productPrice = new ProductPrice(price);
-        var productWeight = new ProductWeight(weight);
-        var warehouseIdModel = new WarehouseId(warehouseId);
-        if (!Enum.TryParse<ProductCategory>(category, ignoreCase: true, out var productCategory))
-        {
-            // TODO: exception
-            throw new Exception("enum parsing stuff");
-        }
+        // var productId = new ProductId(id);
+        // var productName = new ProductName(name);
+        // var productPrice = new ProductPrice(price);
+        // var productWeight = new ProductWeight(weight);
+        // var warehouseIdModel = new WarehouseId(warehouseId);
+        // if (!Enum.TryParse<ProductCategory>(category, ignoreCase: true, out var productCategory))
+        // {
+        //     // TODO: exception
+        //     throw new Exception("enum parsing stuff");
+        // }
 
-        var product = new Product(
-            productId,
-            productName,
-            productPrice,
-            productWeight,
-            productCategory,
-            manufactureDate,
-            warehouseIdModel);
+        // var product = new Product(
+        //     productId,
+        //     productName,
+        //     productPrice,
+        //     productWeight,
+        //     productCategory,
+        //     manufactureDate,
+        //     warehouseIdModel);
+
+        var product = _mapper.Map<Product>(productDto);
         
         _repository.Insert(product);
 

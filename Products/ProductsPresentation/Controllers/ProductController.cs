@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Products.Requests;
 using Products.Responses;
 using Products.Validators;
+using ProductsBusiness.Dto;
 using ProductsBusiness.Services;
 
 namespace Products.Controllers;
@@ -30,17 +31,12 @@ public class ProductController
     public ProductResponse CreateProduct([FromBody] CreateProductRequest request)
     {
         _validator.Validate(request);
+
+        var productDto = _mapper.Map<ProductDto>(request);
         
-        var productDto = _service.CreateProduct(
-            request.Id,
-            request.Name,
-            request.Price,
-            request.Weight,
-            request.Category,
-            request.ManufactureDate,
-            request.WarehouseId);
+        var result = _service.CreateProduct(productDto);
         
-        var response = _mapper.Map<ProductResponse>(productDto);
+        var response = _mapper.Map<ProductResponse>(result);
         return response;
     }
     
