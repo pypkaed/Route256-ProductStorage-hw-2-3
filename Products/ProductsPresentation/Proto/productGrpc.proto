@@ -1,0 +1,90 @@
+syntax="proto3";
+import "google/api/annotations.proto";
+import "google/protobuf/wrappers.proto";
+package product_grpc;
+
+service ProductGrpcService {
+  rpc CreateProduct (CreateProductRequest) returns (ProductResponse) {
+    option (google.api.http) = {
+      post: "/v1/products/create-product",
+      body: "*"
+    };
+  }
+  rpc GetProductById (GetProductByIdRequest) returns (ProductResponse) {
+    option (google.api.http) = {
+      post: "/v1/products/get-product-by-id",
+      body: "*"
+    };
+  }
+  rpc DeleteProductById (DeleteProductByIdRequest) returns (DeleteProductByIdResponse) {
+    option (google.api.http) = {
+      delete: "/v1/products/delete-product-by-id",
+      body: "*"
+    };
+  }
+  rpc UpdateProductPrice (UpdateProductPriceRequest) returns (ProductResponse) {
+    option (google.api.http) = {
+      put: "/v1/products/update-product-price",
+      body: "*"
+    };
+  }
+  rpc GetProductsFiltered(GetProductsFilteredRequest) returns (GetProductsFilteredResponse) {
+    option (google.api.http) = {
+      post: "/v1/products/get-products-filtered",
+      body: "*"
+    };
+  }
+}
+
+message ProductResponse {
+  int64 id = 1;
+  string name = 2;
+  double price = 3;
+  double weight = 4;
+  ProductCategory category = 5;
+  string manufacture_date = 6;
+  int64 warehouseId = 7;
+}
+
+message CreateProductRequest {
+  int64 id = 1;
+  string name = 2;
+  double price = 3;
+  double weight = 4;
+  ProductCategory category = 5;
+  string manufacture_date = 6;
+  int64 warehouseId = 7;
+}
+
+message GetProductByIdRequest {
+  int64 id = 1;
+}
+message DeleteProductByIdRequest {
+  int64 id = 1;
+}
+message UpdateProductPriceRequest {
+  int64 id = 1;
+  double price = 2;
+}
+message GetProductsFilteredRequest {
+  google.protobuf.StringValue product_category_filter = 1;
+  google.protobuf.StringValue product_manufacture_date_filter = 2;
+  google.protobuf.Int64Value product_warehouse_id_filter = 3;
+  PaginationRequest pagination = 4;
+}
+message PaginationRequest {
+  int32 page_number = 1;
+  int32 page_length = 2;
+}
+
+message DeleteProductByIdResponse { }
+message GetProductsFilteredResponse {
+  repeated ProductResponse products = 1;
+}
+
+enum ProductCategory {
+  PRODUCT_CATEGORY_FOOD = 0;
+  PRODUCT_CATEGORY_ELECTRONICS = 1;
+  PRODUCT_CATEGORY_CHEMICALS = 2;
+  PRODUCT_CATEGORY_OTHER = 3;
+}

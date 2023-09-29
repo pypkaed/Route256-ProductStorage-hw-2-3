@@ -68,7 +68,7 @@ public class ProductService : IProductService
         return result.ToList();
     }
 
-    public List<ProductDto> GetPage(int pageNum, int pageLength, List<ProductDto> products)
+    public List<ProductDto> GetPage(int pageNum, int pageLength, IEnumerable<ProductDto> products)
     {
         var skipPagesNum = (pageNum - 1) * pageLength;
         

@@ -1,5 +1,4 @@
 using ProductsBusiness.Dto;
-using ProductsBusiness.Filters;
 
 namespace ProductsBusiness.Services;
 
@@ -10,5 +9,5 @@ public interface IProductService
     void DeleteProductById(long id);
     ProductDto UpdateProductPrice(long id, decimal price);
     List<ProductDto> GetProductsFiltered(FiltersDto filtersDto);
-    List<ProductDto> GetPage(int pageNum, int pageLength, List<ProductDto> products);
+    List<ProductDto> GetPage(int pageNum, int pageLength, IEnumerable<ProductDto> products);
 }

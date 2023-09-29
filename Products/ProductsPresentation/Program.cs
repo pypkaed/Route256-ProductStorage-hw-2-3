@@ -1,9 +1,8 @@
 using FluentValidation;
+using Products.GrpcServices;
 using Products.Validators;
 using ProductsBusiness.Extensions;
-using ProductsBusiness.Services;
 using ProductsDao.Extensions;
-using ProductsDao.Repositories;
 
 namespace Products;
 
@@ -18,11 +17,12 @@ public class Program
         builder.Services.AddBusiness();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+        builder.Services.AddGrpc();
 
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
         builder.Services.AddAutoMapper(typeof(Program));
         builder.Services.AddScoped<RequestValidator>();
-
+        
         var app = builder.Build();
 
         if (app.Environment.IsDevelopment())
@@ -36,6 +36,7 @@ public class Program
         app.UseAuthorization();
 
         app.MapControllers();
+        app.MapGrpcService<ProductsGrpcService>();
 
         app.Run();
     }

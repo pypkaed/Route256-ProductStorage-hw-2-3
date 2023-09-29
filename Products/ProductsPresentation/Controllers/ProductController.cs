@@ -1,5 +1,7 @@
 using AutoMapper;
+using Grpc.Core;
 using Microsoft.AspNetCore.Mvc;
+using Products.GrpcServices;
 using Products.Requests;
 using Products.Responses;
 using Products.Validators;

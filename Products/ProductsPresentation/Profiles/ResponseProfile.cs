@@ -10,5 +10,7 @@ public class ResponseProfile : Profile
     {
         CreateMap<ProductDto, ProductResponse>();
         CreateMap<List<ProductDto>, GetProductsFilteredResponse>();
+        
+        CreateMap<ProductDto, ProductGrpc.ProductResponse>();
     }
 }
