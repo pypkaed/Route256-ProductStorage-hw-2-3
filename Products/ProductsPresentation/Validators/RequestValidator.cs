@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 using FluentValidation;
 using FluentValidation.Results;
@@ -62,7 +63,6 @@ public class RequestValidator
             errorStack.Append(error.ErrorMessage + "\n");
         }
         
-        // TODO: excepton
-        throw new Exception(errorStack.ToString());
+        throw new FluentValidation.ValidationException(errorStack.ToString());
     }
 }

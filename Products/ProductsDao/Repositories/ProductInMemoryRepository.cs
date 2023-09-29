@@ -1,4 +1,5 @@
 using ProductsDao.Entities;
+using ProductsDao.Exceptions;
 using ProductsDao.Models;
 
 namespace ProductsDao.Repositories;
@@ -16,8 +17,7 @@ public class ProductInMemoryRepository : IProductRepository
     {
         if (_products.Contains(product))
         {
-            // TODO: execpton
-            throw new Exception("product already exists");
+            throw RepositoryException.ProductAlreadyExists(product.Id);
         }
         _products.Add(product);
         return product;
@@ -42,8 +42,7 @@ public class ProductInMemoryRepository : IProductRepository
         var product = FindProductById(productId);
         if (product is null)
         {
-            // TODO: excption
-            throw new Exception($"Product with id {productId} does not exist.");
+            throw RepositoryException.ProductDoesNotExists(productId);
         }
 
         return product;
