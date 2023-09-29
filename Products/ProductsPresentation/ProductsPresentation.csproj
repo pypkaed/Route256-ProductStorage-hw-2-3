@@ -24,10 +24,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Interceptors\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\ProductsBusiness\ProductsBusiness.csproj" />
     </ItemGroup>
     
