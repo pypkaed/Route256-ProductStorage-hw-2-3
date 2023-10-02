@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using ProductsDao.Entities;
 using ProductsDao.Exceptions;
 using ProductsDao.Models;
@@ -6,33 +7,33 @@ namespace ProductsDao.Repositories;
 
 public class ProductInMemoryRepository : IProductRepository
 {
-    private readonly List<Product> _products;
+    private readonly ConcurrentDictionary<ProductId, Product> _products;
 
     public ProductInMemoryRepository()
     {
-        _products = new List<Product>();
+        _products = new ConcurrentDictionary<ProductId, Product>();
     }
 
     public Product Insert(Product product)
     {
-        if (_products.Contains(product))
+        if (!_products.TryAdd(product.Id, product))
         {
             throw RepositoryException.ProductAlreadyExists(product.Id);
         }
-        _products.Add(product);
+        
         return product;
     }
 
     public void DeleteById(ProductId productId)
     {
         var product = GetById(productId);
-        _products.Remove(product);
+        _products.Remove(product.Id, out var removedProduct);
     }
 
     public Product Update(Product product)
     {
-        DeleteById(product.Id);
-        Insert(product);
+        var oldProduct = GetById(product.Id);
+        _products.TryUpdate(product.Id, product, oldProduct);
         
         return product;
     }
@@ -48,13 +49,13 @@ public class ProductInMemoryRepository : IProductRepository
         return product;
     }
 
-    public IReadOnlyCollection<Product> GetAll()
+    public IReadOnlyDictionary<ProductId, Product> GetAll()
     {
         return _products.AsReadOnly();
     }
 
     private Product? FindProductById(ProductId productId)
     {
-        return _products.FirstOrDefault(p => p.Id.Equals(productId));
+        return _products[productId];
     }
 }

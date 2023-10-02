@@ -19,14 +19,13 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.AddGrpc(options => {
+            options.Interceptors.Add<ErrorInterceptor>();
             options.Interceptors.Add<LogInterceptor>();
             options.Interceptors.Add<ValidationInterceptor>();
-            options.Interceptors.Add<ErrorInterceptor>();
         });
 
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
         builder.Services.AddAutoMapper(typeof(Program));
-        builder.Services.AddScoped<RequestValidator>();
         
         var app = builder.Build();
 

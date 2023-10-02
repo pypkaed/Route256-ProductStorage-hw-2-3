@@ -19,8 +19,11 @@ public class ValidationInterceptor : Interceptor
         UnaryServerMethod<TRequest, TResponse> continuation)
     {
         var validator = _serviceProvider.GetService<IValidator<TRequest>>();
-        await validator.ValidateAndThrowAsync(request);
-        
+        if (validator is not null)
+        {
+            await validator.ValidateAndThrowAsync(request);
+        }
+
         return await continuation(request, context);
     }
 }

@@ -60,7 +60,7 @@ public class ProductService : IProductService
     {
         var filterChain = filtersDto.AsProductFilterChain();
 
-        var products = _repository.GetAll();
+        var products = _repository.GetAll().Values;
         var filteredProducts = filterChain.Apply(products);
 
         var result = filteredProducts.Select(p => _mapper.Map<ProductDto>(p));
