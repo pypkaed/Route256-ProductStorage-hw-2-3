@@ -17,9 +17,11 @@ public class LogInterceptor : Interceptor
         ServerCallContext context,
         UnaryServerMethod<TRequest, TResponse> continuation)
     {
-        _logger.LogInformation($"Starting {context.Method} with request {request}");
+        var traceId = Guid.NewGuid();
+        
+        _logger.LogInformation($"{traceId}: Starting {context.Method} with request {request}");
         var response = await continuation(request, context);
-        _logger.LogInformation($"End of {context.Method} with request {request}, response is {response}");
+        _logger.LogInformation($"{traceId}: End of {context.Method} with request {request}, response is {response}");
         
         return response;
     }
