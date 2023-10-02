@@ -40,7 +40,7 @@ service ProductGrpcService {
 message ProductResponse {
   int64 id = 1;
   string name = 2;
-  double price = 3;
+  Decimal price = 3;
   double weight = 4;
   ProductCategory category = 5;
   string manufacture_date = 6;
@@ -50,11 +50,16 @@ message ProductResponse {
 message CreateProductRequest {
   int64 id = 1;
   string name = 2;
-  double price = 3;
+  Decimal price = 3;
   double weight = 4;
   ProductCategory category = 5;
   string manufacture_date = 6;
   int64 warehouse_id = 7;
+}
+
+message Decimal {
+  int64 units = 1;
+  sfixed32 nanos = 2;
 }
 
 message GetProductByIdRequest {
@@ -65,7 +70,7 @@ message DeleteProductByIdRequest {
 }
 message UpdateProductPriceRequest {
   int64 id = 1;
-  double price = 2;
+  Decimal price = 2;
 }
 message GetProductsFilteredRequest {
   google.protobuf.StringValue product_category_filter = 1;

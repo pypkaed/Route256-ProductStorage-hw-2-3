@@ -1,22 +1,17 @@
 using AutoMapper;
-using Products.Requests;
 using ProductsBusiness.Dto;
 
 namespace Products.Profiles;
 
 public class RequestProfile : Profile
 {
+    private const decimal NanoFactor = 1_000_000_000;
     public RequestProfile()
     {
         CreateMap<string, DateOnly>().ConstructUsing(x => DateOnly.Parse(x));
+        CreateMap<ProductGrpc.Decimal, decimal>().ConstructUsing(x => x.Units + x.Nanos / NanoFactor);
         
-        CreateMap<CreateProductRequest, ProductDto>();
-        CreateMap<GetProductsFilteredRequest, FiltersDto>();
-        
-        CreateMap<ProductGrpc.CreateProductRequest, ProductDto>()
-            .ForMember(productDto => productDto.Price,
-                expr =>
-                    expr.MapFrom(productRequest => (decimal) productRequest.Price));
+        CreateMap<ProductGrpc.CreateProductRequest, ProductDto>();
         
         CreateMap<ProductGrpc.GetProductsFilteredRequest, FiltersDto>();
     }

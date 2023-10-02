@@ -1,5 +1,4 @@
 using FluentValidation;
-using Products.Requests;
 
 namespace Products.Validators.grpc;
 
@@ -9,7 +8,9 @@ public class GrpcUpdateProductPriceRequestValidator : AbstractValidator<ProductG
     {
         RuleFor(product => product.Id)
             .GreaterThan(0);
-        RuleFor(product => product.Price)
+        RuleFor(product => product.Price.Units)
+            .GreaterThan(0);
+        RuleFor(product => product.Price.Nanos)
             .GreaterThan(0);
     }
 }

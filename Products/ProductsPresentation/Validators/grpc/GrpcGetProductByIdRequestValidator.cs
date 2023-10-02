@@ -1,5 +1,4 @@
 using FluentValidation;
-using Products.Requests;
 
 namespace Products.Validators.grpc;
 

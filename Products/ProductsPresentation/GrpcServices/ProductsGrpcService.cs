@@ -50,7 +50,8 @@ public class ProductsGrpcService : ProductGrpcService.ProductGrpcServiceBase
 
     public override async Task<ProductResponse> UpdateProductPrice(UpdateProductPriceRequest request, ServerCallContext context)
     {
-        var result = _service.UpdateProductPrice(request.Id, (decimal)request.Price);
+        var decimalPrice = _mapper.Map<decimal>(request.Price);
+        var result = _service.UpdateProductPrice(request.Id, decimalPrice);
         var response = _mapper.Map<ProductResponse>(result);
 
         await Task.CompletedTask;
