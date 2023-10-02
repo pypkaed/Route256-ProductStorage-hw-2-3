@@ -23,12 +23,12 @@ public class ErrorInterceptor : Interceptor
         }
         catch (RpcException e)
         {
-            _logger.LogError($"Error while running {context.Method}. Error: {e.Message}");
+            _logger.LogError(e, $"Error while running {context.Method}. Error: {e.Message}");
             throw;
         }
         catch (Exception e)
         {
-            _logger.LogCritical($"Error while running {context.Method}. Error: {e.Message}");
+            _logger.LogCritical(e, $"Error while running {context.Method}. Error: {e.Message}");
             throw;
         }
     }

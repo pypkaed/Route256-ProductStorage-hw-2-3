@@ -1,6 +1,7 @@
 syntax="proto3";
 import "google/api/annotations.proto";
 import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
 package product_grpc;
 
 service ProductGrpcService {
@@ -16,7 +17,7 @@ service ProductGrpcService {
       body: "*"
     };
   }
-  rpc DeleteProductById (DeleteProductByIdRequest) returns (DeleteProductByIdResponse) {
+  rpc DeleteProductById (DeleteProductByIdRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       delete: "/v1/products/delete-product-by-id",
       body: "*"
@@ -43,7 +44,7 @@ message ProductResponse {
   double weight = 4;
   ProductCategory category = 5;
   string manufacture_date = 6;
-  int64 warehouseId = 7;
+  int64 warehouse_id = 7;
 }
 
 message CreateProductRequest {
@@ -53,7 +54,7 @@ message CreateProductRequest {
   double weight = 4;
   ProductCategory category = 5;
   string manufacture_date = 6;
-  int64 warehouseId = 7;
+  int64 warehouse_id = 7;
 }
 
 message GetProductByIdRequest {
@@ -77,14 +78,13 @@ message PaginationRequest {
   int32 page_length = 2;
 }
 
-message DeleteProductByIdResponse { }
 message GetProductsFilteredResponse {
   repeated ProductResponse products = 1;
 }
 
 enum ProductCategory {
-  PRODUCT_CATEGORY_FOOD = 0;
-  PRODUCT_CATEGORY_ELECTRONICS = 1;
-  PRODUCT_CATEGORY_CHEMICALS = 2;
-  PRODUCT_CATEGORY_OTHER = 3;
+  PRODUCT_CATEGORY_OTHER = 0;
+  PRODUCT_CATEGORY_FOOD = 1;
+  PRODUCT_CATEGORY_ELECTRONICS = 2;
+  PRODUCT_CATEGORY_CHEMICALS = 3;
 }

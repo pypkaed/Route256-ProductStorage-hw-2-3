@@ -56,7 +56,7 @@ public class ProductService : IProductService
         return _mapper.Map<ProductDto>(product);
     }
 
-    public List<ProductDto> GetProductsFiltered(FiltersDto filtersDto)
+    public IReadOnlyCollection<ProductDto> GetProductsFiltered(FiltersDto filtersDto)
     {
         var filterChain = filtersDto.AsProductFilterChain();
 
@@ -68,7 +68,7 @@ public class ProductService : IProductService
         return result.ToList();
     }
 
-    public List<ProductDto> GetPage(int pageNum, int pageLength, IEnumerable<ProductDto> products)
+    public IReadOnlyCollection<ProductDto> GetPage(int pageNum, int pageLength, IEnumerable<ProductDto> products)
     {
         var skipPagesNum = (pageNum - 1) * pageLength;
         

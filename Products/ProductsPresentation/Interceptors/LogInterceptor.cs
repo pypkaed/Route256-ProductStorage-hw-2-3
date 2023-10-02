@@ -5,9 +5,9 @@ namespace Products.Interceptors;
 
 public class LogInterceptor : Interceptor
 {
-    private readonly Logger<LogInterceptor> _logger;
+    private readonly ILogger<LogInterceptor> _logger;
 
-    public LogInterceptor(Logger<LogInterceptor> logger)
+    public LogInterceptor(ILogger<LogInterceptor> logger)
     {
         _logger = logger;
     }

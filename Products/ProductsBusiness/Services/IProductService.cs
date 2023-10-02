@@ -8,6 +8,6 @@ public interface IProductService
     ProductDto GetProductById(long id);
     void DeleteProductById(long id);
     ProductDto UpdateProductPrice(long id, decimal price);
-    List<ProductDto> GetProductsFiltered(FiltersDto filtersDto);
-    List<ProductDto> GetPage(int pageNum, int pageLength, IEnumerable<ProductDto> products);
+    IReadOnlyCollection<ProductDto> GetProductsFiltered(FiltersDto filtersDto);
+    IReadOnlyCollection<ProductDto> GetPage(int pageNum, int pageLength, IEnumerable<ProductDto> products);
 }

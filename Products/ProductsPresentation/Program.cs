@@ -1,5 +1,6 @@
 using FluentValidation;
 using Products.GrpcServices;
+using Products.Interceptors;
 using Products.Validators;
 using ProductsBusiness.Extensions;
 using ProductsDao.Extensions;
@@ -17,7 +18,10 @@ public class Program
         builder.Services.AddBusiness();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
-        builder.Services.AddGrpc();
+        builder.Services.AddGrpc(options => {
+            options.Interceptors.Add<LogInterceptor>();
+            options.Interceptors.Add<ErrorInterceptor>();
+        });
 
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
         builder.Services.AddAutoMapper(typeof(Program));
