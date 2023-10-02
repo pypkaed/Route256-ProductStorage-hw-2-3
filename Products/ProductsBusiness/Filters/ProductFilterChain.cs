@@ -11,10 +11,12 @@ public class ProductFilterChain
     public ProductFilterChain(List<ProductFilter> filters)
     {
         _filters = filters;
-        for (int i = 0; i < _filters.Count - 1; i++)
+
+        _filters.Zip(_filters.Skip(1), (current, next) =>
         {
-            _filters[i].SetNext(filters[i + 1]);
-        }
+            current.SetNext(next);
+            return next;
+        });
     }
 
     public IReadOnlyCollection<ProductFilter> Filters => _filters;

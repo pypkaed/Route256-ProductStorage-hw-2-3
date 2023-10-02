@@ -1,5 +1,6 @@
 using AutoMapper;
 using FluentValidation;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using ProductGrpc;
 using ProductsBusiness.Dto;
@@ -39,12 +40,12 @@ public class ProductsGrpcService : ProductGrpcService.ProductGrpcServiceBase
         return response;
     }
 
-    public override async Task<DeleteProductByIdResponse> DeleteProductById(DeleteProductByIdRequest request, ServerCallContext context)
+    public override async Task<Empty> DeleteProductById(DeleteProductByIdRequest request, ServerCallContext context)
     {
         _service.DeleteProductById(request.Id);
 
         await Task.CompletedTask;
-        return new DeleteProductByIdResponse();
+        return new Empty();
     }
 
     public override async Task<ProductResponse> UpdateProductPrice(UpdateProductPriceRequest request, ServerCallContext context)
