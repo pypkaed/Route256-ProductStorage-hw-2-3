@@ -1,4 +1,5 @@
 using AutoMapper;
+using FluentValidation;
 using Grpc.Core;
 using ProductGrpc;
 using ProductsBusiness.Dto;
@@ -11,7 +12,9 @@ public class ProductsGrpcService : ProductGrpcService.ProductGrpcServiceBase
     private readonly IProductService _service;
     private readonly IMapper _mapper;
     
-    public ProductsGrpcService(IProductService service, IMapper mapper)
+    public ProductsGrpcService(
+        IProductService service, 
+        IMapper mapper)
     {
         _service = service;
         _mapper = mapper;

@@ -20,6 +20,7 @@ public class Program
         builder.Services.AddSwaggerGen();
         builder.Services.AddGrpc(options => {
             options.Interceptors.Add<LogInterceptor>();
+            options.Interceptors.Add<ValidationInterceptor>();
             options.Interceptors.Add<ErrorInterceptor>();
         });
 
