@@ -56,6 +56,6 @@ public class ProductInMemoryRepository : IProductRepository
 
     private Product? FindProductById(ProductId productId)
     {
-        return _products[productId];
+        return !_products.ContainsKey(productId) ? null : _products[productId];
     }
 }
