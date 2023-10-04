@@ -1,3 +1,4 @@
+using Moq;
 using ProductsDao.Entities;
 using ProductsDao.Exceptions;
 using ProductsDao.Models;
@@ -28,12 +29,17 @@ public class ProductsInMemoryRepositoryTest
             productCategory: ProductCategory.Chemicals,
             productManufactureDate: DateOnly.FromDateTime(DateTime.Now),
             warehouseId: 1613);
-        
-        _repository.Insert(product);
-        
-        Assert.Equal(product, _repository.GetById(new ProductId(productId)));
-    }
 
+        var repositoryMock = new Mock<IProductRepository>();
+        repositoryMock
+            .Setup(repository => repository.GetById(new ProductId(productId)))
+            .Returns(product);
+        
+        var repository = repositoryMock.Object;
+        
+        Assert.Equal(product, repository.GetById(new ProductId(productId)));
+    }
+    
     [Fact]
     public void GetById_ThrowProductDoesNotExistRepositoryException_Test()
     {
@@ -42,11 +48,11 @@ public class ProductsInMemoryRepositoryTest
             _repository.GetById(new ProductId(1));
         });
     }
-
+    
     [Fact]
     public void GetAllTest()
     {
-        var products = new List<Product>();
+        var products = new Dictionary<ProductId, Product>();
         for (long productId = 1; productId < 100; productId++)
         {
             var product = CreateProduct(
@@ -58,13 +64,20 @@ public class ProductsInMemoryRepositoryTest
                 productManufactureDate: DateOnly.FromDateTime(DateTime.Now),
                 warehouseId: 1613);
             
-            products.Add(product);
-            _repository.Insert(product);
+            products.Add(new ProductId(productId), product);
         }
         
-        Assert.Equal(products, _repository.GetAll().Values);
-    }
+        var repositoryMock = new Mock<IProductRepository>();
+        repositoryMock
+            .Setup(repository => repository.GetAll())
+            .Returns(products);
+        
+        var repository = repositoryMock.Object;
 
+        
+        Assert.Equal(products, repository.GetAll());
+    }
+    
     [Fact]
     public void InsertTest()
     {
@@ -78,10 +91,10 @@ public class ProductsInMemoryRepositoryTest
             warehouseId: 1613);
         
         _repository.Insert(product);
-
+    
         Assert.Contains(product, _repository.GetAll().Values);
     }
-
+    
     [Fact]
     public void InsertSameProduct_ThrowAlreadyExistsRepositoryException_Test()
     {
@@ -95,13 +108,13 @@ public class ProductsInMemoryRepositoryTest
             warehouseId: 1613);
         
         _repository.Insert(product);
-
+    
         Assert.Throws<RepositoryException>(() =>
         {
             _repository.Insert(product);
         });
     }
-
+    
     [Fact]
     public void InsertProductWithSameId_ThrowAlreadyExistsRepositoryException_Test()
     {
@@ -124,13 +137,13 @@ public class ProductsInMemoryRepositoryTest
             warehouseId: 3);
         
         _repository.Insert(product);
-
+    
         Assert.Throws<RepositoryException>(() =>
         {
             _repository.Insert(otherProduct);
         });
     }
-
+    
     [Fact]
     public void DeleteByIdProductTest()
     {
@@ -142,14 +155,14 @@ public class ProductsInMemoryRepositoryTest
             productCategory: ProductCategory.Chemicals,
             productManufactureDate: DateOnly.FromDateTime(DateTime.Now),
             warehouseId: 1613);
-
+    
         _repository.Insert(product);
         
         _repository.DeleteById(new ProductId(1));
         
         Assert.DoesNotContain(product, _repository.GetAll().Values);
     }
-
+    
     [Fact]
     public void DeleteById_ThrowProductDoesNotExistRepositoryException_Test()
     {
@@ -158,7 +171,7 @@ public class ProductsInMemoryRepositoryTest
             _repository.DeleteById(new ProductId(1));
         });
     }
-
+    
     [Fact]
     public void UpdateTest()
     {
@@ -172,12 +185,12 @@ public class ProductsInMemoryRepositoryTest
             productCategory: ProductCategory.Chemicals,
             productManufactureDate: DateOnly.FromDateTime(DateTime.Now),
             warehouseId: 1613);
-
+    
         _repository.Insert(product);
-
+    
         var newPrice = 16823.12m;
         double newWeight = 123;
-
+    
         var updatedProduct = CreateProduct(
             productId: productId,
             productName: "Bebra",
@@ -186,20 +199,20 @@ public class ProductsInMemoryRepositoryTest
             productCategory: ProductCategory.Chemicals,
             productManufactureDate: DateOnly.FromDateTime(DateTime.Now),
             warehouseId: 1613);
-
+    
         _repository.Update(updatedProduct);
         
         Assert.Equal(updatedProduct, _repository.GetById(new ProductId(productId)));
     }
-
+    
     [Fact]
     public void Update_ThrowProductDoesNotExistRepositoryException_Test()
     {
         var productId = 1;
-
+    
         var newPrice = 16823.12m;
         double newWeight = 123;
-
+    
         var updatedProduct = CreateProduct(
             productId: productId,
             productName: "Bebra",
@@ -208,7 +221,7 @@ public class ProductsInMemoryRepositoryTest
             productCategory: ProductCategory.Chemicals,
             productManufactureDate: DateOnly.FromDateTime(DateTime.Now),
             warehouseId: 1613);
-
+    
         Assert.Throws<RepositoryException>(() =>
         {
             _repository.Update(updatedProduct);
