@@ -33,7 +33,7 @@ public class ProductsBusinessMappingTest
         var mappedProductId = _mapper.Map<ProductId>(productIdValue);
         
         mappedProductId.Should().Be(productId);
-    }
+    } 
     
     [Theory]
     [InlineData("Amogus")]
@@ -131,6 +131,4 @@ public class ProductsBusinessMappingTest
                 WarehouseId: 12345),
         };
     }
-    
-    //TODO: exceptions tests
 }

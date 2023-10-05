@@ -18,6 +18,7 @@ public class PresentationRestIntegrationTest : IClassFixture<MockServiceWebAppli
         _factory = new MockServiceWebApplicationFactory<Program>();
     }
 
+    // TODO: this shit :(
     [Fact]
     public async Task RestGetProductByIdTest()
     {

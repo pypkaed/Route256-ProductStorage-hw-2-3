@@ -63,34 +63,41 @@ public class ProductsServiceTest
         });
     } 
     
-    // TODO: memberdata :( or inlinedata
-    [Fact]
-    public void CreateProductWithSameId_ThrowRepeatingProductException_Test()
+    [Theory]
+    [MemberData(nameof(ProductDtoExceptionData))]
+    public void CreateProductWithSameId_ThrowRepeatingProductException_Test(
+        ProductDto productDto,
+        ProductDto otherProductDto)
     {
-        var productDto = new ProductDto(
-            Id: 1,
-            Name: "Krutoi Bober",
-            Price: 123m,
-            Weight: 14, 
-            Category: "Food",
-            ManufactureDate: DateOnly.MaxValue, 
-            WarehouseId: 15);
-        
-        var otherProductDto = new ProductDto(
-            Id: 1,
-            Name: "Lame Bober",
-            Price: 13m,
-            Weight: 4, 
-            Category: "Electronics",
-            ManufactureDate: DateOnly.MinValue, 
-            WarehouseId: 1);
-        
         _service.CreateProduct(productDto);
 
         Assert.Throws<RepositoryException>(() =>
         {
             _service.CreateProduct(otherProductDto);
         });
+    }
+
+    public static IEnumerable<object[]> ProductDtoExceptionData()
+    {
+        yield return new object[]
+        {
+            new ProductDto(
+                Id: 1,
+                Name: "Krutoi Bober",
+                Price: 123m,
+                Weight: 14,
+                Category: "Food",
+                ManufactureDate: DateOnly.MaxValue,
+                WarehouseId: 15),
+            new ProductDto(
+                Id: 1,
+                Name: "Lame Bober",
+                Price: 13m,
+                Weight: 4,
+                Category: "Electronics",
+                ManufactureDate: DateOnly.MinValue,
+                WarehouseId: 1)
+        };
     }
 
     [Fact]
@@ -109,7 +116,6 @@ public class ProductsServiceTest
 
         var service = MockRepository.InitializeServiceWithMockRepositoryGetById(product);
         
-        // TODO: add mapper?
         var productDto = new ProductDto(
             Id: productId,
             Name: "Krutoi Bober",
@@ -131,31 +137,56 @@ public class ProductsServiceTest
         });
     }
 
-    // TODO: MemberData
-    [Fact]
-    public void DeleteProductByIdTest()
+    [Theory]
+    [MemberData(nameof(ProductDtoData))]
+    public void DeleteProductByIdTest(ProductDto productDto)
     {
-        var productId = 1;
-        
-        var productDto = new ProductDto(
-            Id: productId,
-            Name: "Krutoi Bober",
-            Price: 15.6m,
-            Weight: 12, 
-            Category: "Chemicals",
-            ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
-            WarehouseId: 124);
-
-        // TODO: check if moq can do this fucking shit
         _service.CreateProduct(productDto);
         
-        _service.DeleteProductById(productId);
+        _service.DeleteProductById(productDto.Id);
 
         Assert.Throws<RepositoryException>(() =>
         {
-            _service.GetProductById(productId);
+            _service.GetProductById(productDto.Id);
         });
-    } 
+    }
+
+    public static IEnumerable<object[]> ProductDtoData()
+    {
+        yield return new object[]
+        {
+            new ProductDto(
+                Id: 1,
+                Name: "Krutoi Bober",
+                Price: 15.6m,
+                Weight: 12,
+                Category: "Chemicals",
+                ManufactureDate: DateOnly.FromDateTime(DateTime.Now),
+                WarehouseId: 124)
+        };
+        yield return new object[]
+        {
+            new ProductDto(
+                Id: 142,
+                Name: "Krutoi Bober",
+                Price: 154.6m,
+                Weight: 12,
+                Category: "Chemicals",
+                ManufactureDate: DateOnly.FromDateTime(DateTime.Now),
+                WarehouseId: 124)
+        };
+        yield return new object[]
+        {
+            new ProductDto(
+                Id: 121,
+                Name: "Krutoi Bober",
+                Price: 15.6m,
+                Weight: 12,
+                Category: "Chemicals",
+                ManufactureDate: DateOnly.FromDateTime(DateTime.Now),
+                WarehouseId: 124)
+        };
+    }
     
     [Fact]
     public void DeleteProductById_ThrowProductNotFoundException_Test()
@@ -166,26 +197,17 @@ public class ProductsServiceTest
         });
     }
 
-    [Fact]
-    public void UpdateProductPriceTest()
+    [Theory]
+    [MemberData(nameof(ProductDtoData))]
+    public void UpdateProductPriceTest(ProductDto productDto)
     {
-        var productId = 1;
-        
-        var productDto = new ProductDto(
-            Id: productId,
-            Name: "Krutoi Bober",
-            Price: 15.6m,
-            Weight: 12, 
-            Category: "Chemicals",
-            ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
-            WarehouseId: 124);
-
         _service.CreateProduct(productDto);
 
         var newPrice = 1434.3m;
-        _service.UpdateProductPrice(productId, newPrice);
-        
-        Assert.Equal(newPrice, _service.GetProductById(productId).Price);
+        _service.UpdateProductPrice(productDto.Id, newPrice);
+
+        var resultPrice = _service.GetProductById(productDto.Id).Price;
+        Assert.Equal(newPrice, resultPrice);
     }
     
     [Fact]
@@ -531,7 +553,4 @@ public class ProductsServiceTest
         var result = _service.GetPage(1, 3, filteredResult);
         Assert.Equal(products.Take(3), result);
     }
-
-    // TODO: refactor :D
-    // TODO: inlinedata on page tests
 }
