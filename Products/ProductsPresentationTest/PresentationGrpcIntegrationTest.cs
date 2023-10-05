@@ -1,5 +1,7 @@
 using FluentAssertions;
+using Grpc.Core;
 using Grpc.Net.Client;
+using Microsoft.AspNetCore.Mvc.Testing;
 using ProductGrpc;
 using Products;
 using ProductsPresentationTest.Helpers;
@@ -70,30 +72,135 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
         response.Should().NotBeNull();
         response.Id.Should().Be(request.Id);
     }
-    
-    // rpc CreateProduct (CreateProductRequest) returns (ProductResponse) {
-    //     option (google.api.http) = {
-    //         post: "/v1/products/create-product",
-    //         body: "*"
-    //     };
-    // }
 
-    // rpc DeleteProductById (DeleteProductByIdRequest) returns (google.protobuf.Empty) {
-    //     option (google.api.http) = {
-    //         delete: "/v1/products/delete-product-by-id",
-    //         body: "*"
-    //     };
-    // }
-    // rpc UpdateProductPrice (UpdateProductPriceRequest) returns (ProductResponse) {
-    //     option (google.api.http) = {
-    //         put: "/v1/products/update-product-price",
-    //         body: "*"
-    //     };
-    // }
-    // rpc GetProductsFiltered(GetProductsFilteredRequest) returns (GetProductsFilteredResponse) {
-    //     option (google.api.http) = {
-    //         post: "/v1/products/get-products-filtered",
-    //         body: "*"
-    //     };
-    // }
+    [Fact]
+    public void DeleteProductByIdTest()
+    {
+        var factory = new WebApplicationFactory<Program>();
+        var webAppClient = factory.CreateClient();
+        var channel = GrpcChannel.ForAddress(webAppClient.BaseAddress, new GrpcChannelOptions()
+        {
+            HttpClient = webAppClient
+        });
+
+        var grpcClient = new ProductGrpcService.ProductGrpcServiceClient(channel);
+
+        var createProductRequest = new CreateProductRequest()
+        {
+            Id = 1,
+            Name = "Bebrijon",
+            Price = new ProductGrpc.Decimal()
+            {
+                Units = 123,
+                Nanos = 10000000,
+            },
+            Weight = 3245.4,
+            Category = ProductCategory.Electronics,
+            ManufactureDate = "2022/01/01",
+            WarehouseId = 12345
+        };
+        
+        grpcClient.CreateProduct(createProductRequest);
+        
+        var request = new DeleteProductByIdRequest()
+        {
+            Id = 1
+        };
+
+        grpcClient.DeleteProductById(request);
+        Assert.Throws<RpcException>(() => grpcClient.GetProductById(new GetProductByIdRequest { Id = request.Id }));
+    }
+
+    [Fact]
+    public void UpdateProductPriceTest()
+    {
+        var factory = new WebApplicationFactory<Program>();
+        var webAppClient = factory.CreateClient();
+        var channel = GrpcChannel.ForAddress(webAppClient.BaseAddress, new GrpcChannelOptions()
+        {
+            HttpClient = webAppClient
+        });
+
+        var grpcClient = new ProductGrpcService.ProductGrpcServiceClient(channel);
+
+        var createProductRequest = new CreateProductRequest()
+        {
+            Id = 1,
+            Name = "Bebrijon",
+            Price = new ProductGrpc.Decimal()
+            {
+                Units = 123,
+                Nanos = 10000000,
+            },
+            Weight = 3245.4,
+            Category = ProductCategory.Electronics,
+            ManufactureDate = "2022/01/01",
+            WarehouseId = 12345
+        };
+        
+        grpcClient.CreateProduct(createProductRequest);
+
+        var newPrice = new ProductGrpc.Decimal()
+        {
+            Units = 1234,
+            Nanos = 200000000,
+        };
+        
+        var request = new UpdateProductPriceRequest()
+        {
+            Id = 1,
+            Price = newPrice
+        };
+
+        var response = grpcClient.UpdateProductPrice(request);
+
+        response.Should().NotBeNull();
+        response.Price.Should().Be(newPrice);
+    }
+
+    [Fact]
+    public void GetProductsFilteredTest()
+    {
+        var factory = new WebApplicationFactory<Program>();
+
+        var webAppClient = factory.CreateClient();
+        var channel = GrpcChannel.ForAddress(webAppClient.BaseAddress, new GrpcChannelOptions()
+        {
+            HttpClient = webAppClient
+        });
+
+        var grpcClient = new ProductGrpcService.ProductGrpcServiceClient(channel);
+        
+        var products = new List<ProductResponse>();
+        for (int productId = 1; productId < 50; productId++)
+        {
+            var createProductRequest = new CreateProductRequest()
+            {
+                Id = productId,
+                Name = "Bebrijon",
+                Price = new ProductGrpc.Decimal()
+                {
+                    Units = 123,
+                    Nanos = 10000000,
+                },
+                Weight = 3245.4,
+                Category = ProductCategory.Electronics,
+                ManufactureDate = "2022/01/01",
+                WarehouseId = 12345
+            };
+
+            var productResponse = grpcClient.CreateProduct(createProductRequest);
+            products.Add(productResponse);
+        }
+
+        var request = new GetProductsFilteredRequest
+        {
+            ProductCategoryFilter = "Electronics"
+        };
+
+        var response = grpcClient.GetProductsFiltered(request);
+
+        response.Should().NotBeNull();
+        response.Products.Should().Equal(products);
+    }
 }

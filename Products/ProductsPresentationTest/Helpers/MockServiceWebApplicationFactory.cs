@@ -41,8 +41,11 @@ public class MockServiceWebApplicationFactory<TProgram>
                     request.Category,
                     request.ManufactureDate,
                     request.WarehouseId));
-
-            
+                
+                serviceMock.Verify(x => 
+                    x.CreateProduct(It.IsAny<ProductDto>()),
+                    Times.AtMostOnce);
+                
                 return serviceMock.Object;
             }));
         });
