@@ -48,9 +48,9 @@ public class ProductsBusinessMappingTest
     }
     
     [Theory]
-    [InlineData(1234567m)]
-    [InlineData(1m)]
-    [InlineData(1.231456786543m)]
+    [InlineData(1234567)]
+    [InlineData(1)]
+    [InlineData(1.231456786543)]
     public void ProductPriceMappingTest(decimal productPriceValue)
     {
         var productPrice = new ProductPrice(productPriceValue);

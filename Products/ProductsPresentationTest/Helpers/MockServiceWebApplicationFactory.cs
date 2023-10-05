@@ -16,25 +16,33 @@ public class MockServiceWebApplicationFactory<TProgram>
         base.ConfigureWebHost(builder);
         builder.ConfigureServices(services =>
         {
-            services.RemoveAll<IProductService>();
-
             services.Replace(ServiceDescriptor.Singleton<IProductService>(_ =>
             {
                 var serviceMock = new Mock<IProductService>();
-
-                var product = new ProductDto(
-                    Id: 1,
-                    Name: "Krutoi Bober",
-                    Price: 15.6m,
-                    Weight: 12,
-                    Category: "Chemicals",
-                    ManufactureDate: DateOnly.FromDateTime(DateTime.Now),
-                    WarehouseId: 124);
                 
                 serviceMock
-                    .Setup(service => service.GetProductById(product.Id))
-                    .Returns(product);
-        
+                    .Setup(service => service.GetProductById(It.IsAny<long>()))
+                    .Returns<long>((long id) => new ProductDto(
+                        Id: id,
+                        Name: "Krutoi Bober",
+                        Price: 15.6m,
+                        Weight: 12,
+                        Category: "Chemicals",
+                        ManufactureDate: DateOnly.FromDateTime(DateTime.Now),
+                        WarehouseId: 124));
+
+                serviceMock
+                    .Setup(service => service.CreateProduct(It.IsAny<ProductDto>()))
+                    .Returns<ProductDto>((ProductDto request) => new ProductDto
+                    (request.Id,
+                    request.Name,
+                    request.Price,
+                    request.Weight,
+                    request.Category,
+                    request.ManufactureDate,
+                    request.WarehouseId));
+
+            
                 return serviceMock.Object;
             }));
         });
