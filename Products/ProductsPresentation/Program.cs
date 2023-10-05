@@ -22,7 +22,8 @@ public class Program
             options.Interceptors.Add<ErrorInterceptor>();
             options.Interceptors.Add<LogInterceptor>();
             options.Interceptors.Add<ValidationInterceptor>();
-        });
+        })
+            .AddJsonTranscoding();
 
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
         builder.Services.AddAutoMapper(typeof(Program));
