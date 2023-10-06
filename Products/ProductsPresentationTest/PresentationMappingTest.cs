@@ -172,6 +172,4 @@ public class PresentationMappingTest
                 1234)
         };
     }
-    
-    // TODO: exceptions tets :(
 }

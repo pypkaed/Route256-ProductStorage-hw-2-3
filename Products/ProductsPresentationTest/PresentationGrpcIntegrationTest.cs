@@ -18,10 +18,12 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
         _factory = new MockServiceWebApplicationFactory<Program>();
     }
     
-    // TODO: add exception tests.......
 
-    [Fact]
-    public void GrpcGetProductByIdTest()
+    [Theory]
+    [InlineData(1)]
+    [InlineData(100)]
+    [InlineData(99999999)]
+    public void GrpcGetProductByIdTest(long id)
     {
         var webAppClient = _factory.CreateClient();
         var channel = GrpcChannel.ForAddress(webAppClient.BaseAddress, new GrpcChannelOptions()
@@ -33,16 +35,19 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
 
         var request = new GetProductByIdRequest() 
         {
-            Id = 1
+            Id = id
         };
         
         var response = grpcClient.GetProductById(request);
         response.Should().NotBeNull();
-        response.Id.Should().Be(1);
+        response.Id.Should().Be(id);
     }
-
-    [Fact]
-    public void GrpcCreateProductTest()
+    
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    [InlineData(-123)]
+    public void GrpcGetProductById_ThrowsValidationException_Test(long id)
     {
         var webAppClient = _factory.CreateClient();
         var channel = GrpcChannel.ForAddress(webAppClient.BaseAddress, new GrpcChannelOptions()
@@ -52,20 +57,28 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
 
         var grpcClient = new ProductGrpcService.ProductGrpcServiceClient(channel);
 
-        var request = new CreateProductRequest()
+        var request = new GetProductByIdRequest() 
         {
-            Id = 23,
-            Name = "Bebrijon",
-            Price = new ProductGrpc.Decimal()
-            {
-                Units = 123,
-                Nanos = 10000000,
-            },
-            Weight = 3245.4,
-            Category = ProductCategory.Electronics,
-            ManufactureDate = "2022/01/01",
-            WarehouseId = 12345
+            Id = id
         };
+
+        Assert.Throws<RpcException>(() =>
+        {
+            grpcClient.GetProductById(request);
+        });
+    }
+
+    [Theory]
+    [MemberData(nameof(CreateProductRequestData))]
+    public void GrpcCreateProductTest(CreateProductRequest request)
+    {
+        var webAppClient = _factory.CreateClient();
+        var channel = GrpcChannel.ForAddress(webAppClient.BaseAddress, new GrpcChannelOptions()
+        {
+            HttpClient = webAppClient
+        });
+
+        var grpcClient = new ProductGrpcService.ProductGrpcServiceClient(channel);
 
         var response = grpcClient.CreateProduct(request);
         
@@ -73,8 +86,137 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
         response.Id.Should().Be(request.Id);
     }
 
-    [Fact]
-    public void DeleteProductByIdTest()
+    public static IEnumerable<object[]> CreateProductRequestData()
+    {
+        yield return new object[]
+        {
+            new CreateProductRequest()
+            {
+                Id = 23,
+                Name = "Bebrijon",
+                Price = new ProductGrpc.Decimal()
+                {
+                    Units = 123,
+                    Nanos = 10000000,
+                },
+                Weight = 3245.4,
+                Category = ProductCategory.Electronics,
+                ManufactureDate = "2022/01/01",
+                WarehouseId = 12345
+            }
+        };
+        yield return new object[]
+        {
+            new CreateProductRequest()
+            {
+                Id = 1,
+                Name = "Bebrijon",
+                Price = new ProductGrpc.Decimal()
+                {
+                    Units = 143,
+                    Nanos = 1940,
+                },
+                Weight = 3245.4,
+                Category = ProductCategory.Electronics,
+                ManufactureDate = "2023/01/01",
+                WarehouseId = 12345
+            }
+        };
+        yield return new object[]
+        {
+            new CreateProductRequest()
+            {
+                Id = 67,
+                Name = "a",
+                Price = new ProductGrpc.Decimal()
+                {
+                    Units = 123,
+                    Nanos = 10000000,
+                },
+                Weight = 3245.4,
+                Category = ProductCategory.Electronics,
+                ManufactureDate = "2022/01/01",
+                WarehouseId = 12345
+            }
+        };
+    }
+
+    
+    [Theory]
+    [MemberData(nameof(CreateProductRequestExceptionData))]
+    public void GrpcCreateProduct_ThrowValidationException_Test(CreateProductRequest request)
+    {
+        var webAppClient = _factory.CreateClient();
+        var channel = GrpcChannel.ForAddress(webAppClient.BaseAddress, new GrpcChannelOptions()
+        {
+            HttpClient = webAppClient
+        });
+
+        var grpcClient = new ProductGrpcService.ProductGrpcServiceClient(channel);
+
+        Assert.Throws<RpcException>(() => grpcClient.CreateProduct(request));
+    }
+    
+    public static IEnumerable<object[]> CreateProductRequestExceptionData()
+    {
+        yield return new object[]
+        {
+            new CreateProductRequest()
+            {
+                Id = -123,
+                Name = "Bebrijon",
+                Price = new ProductGrpc.Decimal()
+                {
+                    Units = 123,
+                    Nanos = 10000000,
+                },
+                Weight = 3245.4,
+                Category = ProductCategory.Electronics,
+                ManufactureDate = "2022/01/01",
+                WarehouseId = 12345
+            }
+        };
+        yield return new object[]
+        {
+            new CreateProductRequest()
+            {
+                Id = 1,
+                Name = "",
+                Price = new ProductGrpc.Decimal()
+                {
+                    Units = 143,
+                    Nanos = 1940,
+                },
+                Weight = 3245.4,
+                Category = ProductCategory.Electronics,
+                ManufactureDate = "2023/01/01",
+                WarehouseId = 12345
+            }
+        };
+        yield return new object[]
+        {
+            new CreateProductRequest()
+            {
+                Id = 67,
+                Name = "a",
+                Price = new ProductGrpc.Decimal()
+                {
+                    Units = 123,
+                    Nanos = 10000000,
+                },
+                Weight = 3245.4,
+                Category = ProductCategory.Electronics,
+                ManufactureDate = "202234/01/01",
+                WarehouseId = 12345
+            }
+        };
+    }
+    
+    [Theory]
+    [InlineData(1)]
+    [InlineData(123)]
+    [InlineData(1234566)]
+    public void DeleteProductByIdTest(long id)
     {
         var factory = new WebApplicationFactory<Program>();
         var webAppClient = factory.CreateClient();
@@ -87,7 +229,7 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
 
         var createProductRequest = new CreateProductRequest()
         {
-            Id = 1,
+            Id = id,
             Name = "Bebrijon",
             Price = new ProductGrpc.Decimal()
             {
@@ -104,15 +246,16 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
         
         var request = new DeleteProductByIdRequest()
         {
-            Id = 1
+            Id = id
         };
 
         grpcClient.DeleteProductById(request);
-        Assert.Throws<RpcException>(() => grpcClient.GetProductById(new GetProductByIdRequest { Id = request.Id }));
+        Assert.Throws<RpcException>(() => grpcClient.GetProductById(new GetProductByIdRequest { Id = id }));
     }
 
-    [Fact]
-    public void UpdateProductPriceTest()
+    [Theory]
+    [MemberData(nameof(IdAndProductGrpcDecimalData))]
+    public void UpdateProductPriceTest(long id, ProductGrpc.Decimal newPrice)
     {
         var factory = new WebApplicationFactory<Program>();
         var webAppClient = factory.CreateClient();
@@ -125,7 +268,7 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
 
         var createProductRequest = new CreateProductRequest()
         {
-            Id = 1,
+            Id = id,
             Name = "Bebrijon",
             Price = new ProductGrpc.Decimal()
             {
@@ -139,16 +282,10 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
         };
         
         grpcClient.CreateProduct(createProductRequest);
-
-        var newPrice = new ProductGrpc.Decimal()
-        {
-            Units = 1234,
-            Nanos = 200000000,
-        };
         
         var request = new UpdateProductPriceRequest()
         {
-            Id = 1,
+            Id = id,
             Price = newPrice
         };
 
@@ -158,6 +295,19 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
         response.Price.Should().Be(newPrice);
     }
 
+    public static IEnumerable<object[]> IdAndProductGrpcDecimalData()
+    {
+        yield return new object[]
+        {
+            123,
+            new ProductGrpc.Decimal()
+            {
+                Units = 132,
+                Nanos = 234567892,
+            }
+        };
+    }
+    
     [Fact]
     public void GetProductsFilteredTest()
     {
