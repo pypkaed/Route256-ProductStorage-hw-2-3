@@ -25,29 +25,35 @@ public class PresentationMappingTest
 
     [Theory]
     [MemberData(nameof(ProductGrpcDecimalData))]
-    public void GrpcDecimalToDecimalMappingTest(ProductGrpc.Decimal grpcDecimal)
+    public void GrpcDecimalToDecimalMapping_Success(ProductGrpc.Decimal grpcDecimal)
     {
-        var actualDecimal = grpcDecimal.Units + grpcDecimal.Nanos / NanoFactor;
+        // Arrange
+        var expected = grpcDecimal.Units + grpcDecimal.Nanos / NanoFactor;
 
-        var mappedDecimal = _mapper.Map<decimal>(grpcDecimal);
+        // Act
+        var actual = _mapper.Map<decimal>(grpcDecimal);
         
-        Assert.Equal(actualDecimal, mappedDecimal);
+        // Assert
+        Assert.Equal(expected, actual);
     }
 
     [Theory]
     [InlineData(1234567.32456)]
     [InlineData(0.0000000001)]
-    public void DecimalToGrpcDecimalMappingTest(decimal decimalValue)
+    public void DecimalToGrpcDecimalMapping_Success(decimal decimalValue)
     {
-        var grpcDecimal = new ProductGrpc.Decimal
+        // Arrange
+        var expected = new ProductGrpc.Decimal
         {
             Units = decimal.ToInt64(decimalValue),
             Nanos = decimal.ToInt32((decimalValue - decimal.Truncate(decimalValue)) * NanoFactor),
         };
 
-        var mappedDecimal = _mapper.Map<ProductGrpc.Decimal>(decimalValue);
+        // Act
+        var actual = _mapper.Map<ProductGrpc.Decimal>(decimalValue);
 
-        Assert.Equal(grpcDecimal, mappedDecimal);
+        // Assert
+        Assert.Equal(expected, actual);
     }
 
     public static IEnumerable<object[]> ProductGrpcDecimalData()
@@ -72,9 +78,10 @@ public class PresentationMappingTest
 
     [Theory]
     [MemberData(nameof(CreateProductRequestData))]
-    public void CreateProductRequestToProductDtoMappingTest(CreateProductRequest request)
+    public void CreateProductRequestToProductDtoMapping_Success(CreateProductRequest request)
     {
-        var productDto = new ProductDto(
+        // Arrange
+        var expected = new ProductDto(
             request.Id,
             request.Name, 
             _mapper.Map<decimal>(request.Price),
@@ -83,9 +90,11 @@ public class PresentationMappingTest
             DateOnly.Parse(request.ManufactureDate),
             request.WarehouseId);
 
-        var mappedProductDto = _mapper.Map<ProductDto>(request);
+        // Act
+        var actual = _mapper.Map<ProductDto>(request);
         
-        Assert.Equal(productDto, mappedProductDto);
+        // Assert
+        Assert.Equal(expected, actual);
     }
     
     public static IEnumerable<object[]> CreateProductRequestData()
@@ -111,18 +120,21 @@ public class PresentationMappingTest
     
     [Theory]
     [MemberData(nameof(GetProductsFilteredRequestData))]
-    public void GetProductsFilteredRequestToFiltersDtoMappingTest(GetProductsFilteredRequest request)
+    public void GetProductsFilteredRequestToFiltersDtoMapping_Success(GetProductsFilteredRequest request)
     {
-        var filtersDto = new FiltersDto
+        // Arrange
+        var expected = new FiltersDto
         {
             ProductCategoryFilter = request.ProductCategoryFilter, 
             ProductManufactureDateFilter = DateOnly.Parse(request.ProductManufactureDateFilter),
             ProductWarehouseIdFilter = request.ProductWarehouseIdFilter,
         };
         
-        var mappedFiltersDto = _mapper.Map<FiltersDto>(request);
+        // Act
+        var actual = _mapper.Map<FiltersDto>(request);
         
-        Assert.Equal(filtersDto, mappedFiltersDto);
+        // Assert
+        Assert.Equal(expected, actual);
     }
     
     public static IEnumerable<object[]> GetProductsFilteredRequestData()
@@ -142,7 +154,8 @@ public class PresentationMappingTest
     [MemberData(nameof(ProductDtoData))]
     public void ProductDtoToProductResponseMappingTest(ProductDto productDto)
     {
-        var productResponse = new ProductResponse()
+        // Arrange
+        var expected = new ProductResponse()
         {   
             Id = productDto.Id,
             Name = productDto.Name,
@@ -153,9 +166,11 @@ public class PresentationMappingTest
             WarehouseId = productDto.WarehouseId,
         };
 
-        var mappedProductResponse = _mapper.Map<ProductResponse>(productDto);
+        // Act
+        var actual = _mapper.Map<ProductResponse>(productDto);
         
-        Assert.Equal(productResponse, mappedProductResponse);
+        // Assert
+        Assert.Equal(expected, actual);
     }
 
     public static IEnumerable<object[]> ProductDtoData()

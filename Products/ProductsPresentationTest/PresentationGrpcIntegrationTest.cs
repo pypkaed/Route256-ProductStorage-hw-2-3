@@ -23,32 +23,39 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
     [InlineData(1)]
     [InlineData(100)]
     [InlineData(99999999)]
-    public void GrpcGetProductByIdTest(long id)
+    public void GrpcGetProductById_Success(long id)
     {
+        // Arrange
         var webAppClient = _factory.CreateClient();
         var channel = GrpcChannel.ForAddress(webAppClient.BaseAddress, new GrpcChannelOptions()
         {
             HttpClient = webAppClient
         });
-
+        
         var grpcClient = new ProductGrpcService.ProductGrpcServiceClient(channel);
-
+        
         var request = new GetProductByIdRequest() 
         {
             Id = id
         };
         
+        // Act
         var response = grpcClient.GetProductById(request);
-        response.Should().NotBeNull();
-        response.Id.Should().Be(id);
+        var expected = response.Id;
+        var actual = request.Id;
+
+        // Assert
+        Assert.NotNull(response);
+        Assert.Equal(expected, actual);
     }
     
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
     [InlineData(-123)]
-    public void GrpcGetProductById_ThrowsValidationException_Test(long id)
+    public void GrpcGetProductById_ThrowsValidationException(long id)
     {
+        // Arrange
         var webAppClient = _factory.CreateClient();
         var channel = GrpcChannel.ForAddress(webAppClient.BaseAddress, new GrpcChannelOptions()
         {
@@ -62,6 +69,7 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
             Id = id
         };
 
+        // Assert
         Assert.Throws<RpcException>(() =>
         {
             grpcClient.GetProductById(request);
@@ -70,8 +78,9 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
 
     [Theory]
     [MemberData(nameof(CreateProductRequestData))]
-    public void GrpcCreateProductTest(CreateProductRequest request)
+    public void GrpcCreateProduct_Success(CreateProductRequest request)
     {
+        // Arrange
         var webAppClient = _factory.CreateClient();
         var channel = GrpcChannel.ForAddress(webAppClient.BaseAddress, new GrpcChannelOptions()
         {
@@ -80,10 +89,14 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
 
         var grpcClient = new ProductGrpcService.ProductGrpcServiceClient(channel);
 
+        // Act
         var response = grpcClient.CreateProduct(request);
+        var expected = response.Id;
+        var actual = request.Id;
         
-        response.Should().NotBeNull();
-        response.Id.Should().Be(request.Id);
+        // Assert
+        Assert.NotNull(response);
+        Assert.Equal(expected, actual);
     }
 
     public static IEnumerable<object[]> CreateProductRequestData()
@@ -144,8 +157,9 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
     
     [Theory]
     [MemberData(nameof(CreateProductRequestExceptionData))]
-    public void GrpcCreateProduct_ThrowValidationException_Test(CreateProductRequest request)
+    public void GrpcCreateProduct_ThrowValidationException(CreateProductRequest request)
     {
+        // Arrange
         var webAppClient = _factory.CreateClient();
         var channel = GrpcChannel.ForAddress(webAppClient.BaseAddress, new GrpcChannelOptions()
         {
@@ -154,6 +168,7 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
 
         var grpcClient = new ProductGrpcService.ProductGrpcServiceClient(channel);
 
+        // Assert
         Assert.Throws<RpcException>(() => grpcClient.CreateProduct(request));
     }
     
@@ -216,8 +231,9 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
     [InlineData(1)]
     [InlineData(123)]
     [InlineData(1234566)]
-    public void DeleteProductByIdTest(long id)
+    public void DeleteProductById_Success(long id)
     {
+        // Arrange
         var factory = new WebApplicationFactory<Program>();
         var webAppClient = factory.CreateClient();
         var channel = GrpcChannel.ForAddress(webAppClient.BaseAddress, new GrpcChannelOptions()
@@ -249,14 +265,18 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
             Id = id
         };
 
+        // Act
         grpcClient.DeleteProductById(request);
+        
+        // Assert
         Assert.Throws<RpcException>(() => grpcClient.GetProductById(new GetProductByIdRequest { Id = id }));
     }
 
     [Theory]
     [MemberData(nameof(IdAndProductGrpcDecimalData))]
-    public void UpdateProductPriceTest(long id, ProductGrpc.Decimal newPrice)
+    public void UpdateProductPrice_Success(long id, ProductGrpc.Decimal actual)
     {
+        // Arrange
         var factory = new WebApplicationFactory<Program>();
         var webAppClient = factory.CreateClient();
         var channel = GrpcChannel.ForAddress(webAppClient.BaseAddress, new GrpcChannelOptions()
@@ -286,13 +306,16 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
         var request = new UpdateProductPriceRequest()
         {
             Id = id,
-            Price = newPrice
+            Price = actual
         };
 
+        // Act
         var response = grpcClient.UpdateProductPrice(request);
+        var expected = response.Price;
 
-        response.Should().NotBeNull();
-        response.Price.Should().Be(newPrice);
+        // Assert
+        Assert.NotNull(response);
+        Assert.Equal(expected, actual);
     }
 
     public static IEnumerable<object[]> IdAndProductGrpcDecimalData()
@@ -309,8 +332,9 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
     }
     
     [Fact]
-    public void GetProductsFilteredTest()
+    public void GetProductsFiltered_Success()
     {
+        // Arrange
         var factory = new WebApplicationFactory<Program>();
 
         var webAppClient = factory.CreateClient();
@@ -321,7 +345,9 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
 
         var grpcClient = new ProductGrpcService.ProductGrpcServiceClient(channel);
         
-        var products = new List<ProductResponse>();
+        var actual = new List<ProductResponse>();
+        
+        // Act
         for (int productId = 1; productId < 50; productId++)
         {
             var createProductRequest = new CreateProductRequest()
@@ -340,7 +366,7 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
             };
 
             var productResponse = grpcClient.CreateProduct(createProductRequest);
-            products.Add(productResponse);
+            actual.Add(productResponse);
         }
 
         var request = new GetProductsFilteredRequest
@@ -348,9 +374,11 @@ public class PresentationGrpcIntegrationTest : IClassFixture<MockServiceWebAppli
             ProductCategoryFilter = "Electronics"
         };
 
+        // Assert
         var response = grpcClient.GetProductsFiltered(request);
-
-        response.Should().NotBeNull();
-        response.Products.Should().Equal(products);
+        var expected = response.Products;
+        
+        Assert.NotNull(response);
+        Assert.Equal(expected, actual);
     }
 }

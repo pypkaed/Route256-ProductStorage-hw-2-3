@@ -26,38 +26,47 @@ public class ProductsBusinessMappingTest
     [InlineData(123)]
     [InlineData(9999999)]
     [InlineData(1)]
-    public void ProductIdMappingTest(long productIdValue)
+    public void ProductIdMapping_Success(long productIdValue)
     {
-        var productId = new ProductId(productIdValue);
+        // Arrange
+        var actual = new ProductId(productIdValue);
 
-        var mappedProductId = _mapper.Map<ProductId>(productIdValue);
-        
-        mappedProductId.Should().Be(productId);
+        // Act
+        var expected = _mapper.Map<ProductId>(productIdValue);
+
+        // Assert
+        Assert.Equal(expected, actual);
     } 
     
     [Theory]
     [InlineData("Amogus")]
     [InlineData("Sus")]
-    public void ProductNameMappingTest(string productNameValue)
+    public void ProductNameMapping_Success(string productNameValue)
     {
-        var productName = new ProductName(productNameValue);
+        // Arrange
+        var actual = new ProductName(productNameValue);
 
-        var mappedProductName = _mapper.Map<ProductName>(productNameValue);
+        // Act
+        var expected = _mapper.Map<ProductName>(productNameValue);
         
-        mappedProductName.Should().Be(productName);
+        // Assert
+        Assert.Equal(expected, actual);
     }
     
     [Theory]
     [InlineData(1234567)]
     [InlineData(1)]
     [InlineData(1.231456786543)]
-    public void ProductPriceMappingTest(decimal productPriceValue)
+    public void ProductPriceMapping_Success(decimal productPriceValue)
     {
-        var productPrice = new ProductPrice(productPriceValue);
+        // Arrange
+        var actual = new ProductPrice(productPriceValue);
 
-        var mappedProductPrice = _mapper.Map<ProductPrice>(productPriceValue);
+        // Act
+        var expected = _mapper.Map<ProductPrice>(productPriceValue);
         
-        mappedProductPrice.Should().Be(productPrice);
+        // Assert
+        Assert.Equal(expected, actual);
     }
     
     [Theory]
@@ -65,13 +74,16 @@ public class ProductsBusinessMappingTest
     [InlineData(0.000000001)]
     [InlineData(999999999999999999)]
     [InlineData(324567.3245678)]
-    public void ProductWeightMappingTest(double productWeightValue)
+    public void ProductWeightMapping_Success(double productWeightValue)
     {
-        var productWeight = new ProductWeight(productWeightValue);
+        // Arrange
+        var actual = new ProductWeight(productWeightValue);
 
-        var mappedProductWeight = _mapper.Map<ProductWeight>(productWeightValue);
+        // Act
+        var expected = _mapper.Map<ProductWeight>(productWeightValue);
         
-        mappedProductWeight.Should().Be(productWeight);
+        // Assert
+        Assert.Equal(expected, actual);
     }
     
     [Theory]
@@ -79,31 +91,37 @@ public class ProductsBusinessMappingTest
     [InlineData("Electronics")]
     [InlineData("Food")]
     [InlineData("Other")]
-    public void ProductCategoryMappingTest(string productCategory)
+    public void ProductCategoryMapping_Success(string productCategory)
     {
-        var mappedProductCategory = _mapper.Map<ProductCategory>(productCategory);
+        // Act
+        var expected = _mapper.Map<ProductCategory>(productCategory);
         
-        mappedProductCategory.ToString().Should().Be(productCategory);
+        // Assert
+        Assert.Equal(expected.ToString(), productCategory);
     }
     
     [Theory]
     [InlineData(23454)]
     [InlineData(1)]
     [InlineData(99999)]
-    public void WarehouseIdMappingTest(long warehouseIdValue)
+    public void WarehouseIdMapping_Success(long warehouseIdValue)
     {
-        var warehouseId = new WarehouseId(warehouseIdValue);
+        // Arrange
+        var actual = new WarehouseId(warehouseIdValue);
 
-        var mappedWarehouseId = _mapper.Map<WarehouseId>(warehouseIdValue);
+        // Act
+        var expected = _mapper.Map<WarehouseId>(warehouseIdValue);
         
-        mappedWarehouseId.Should().Be(warehouseId);
+        // Assert
+        Assert.Equal(expected, actual);
     }
     
     [Theory]
     [MemberData(nameof(ProductDtoData))]
-    public void ProductDtoToProductMappingTest(ProductDto productDto)
+    public void ProductDtoToProductMapping_Success(ProductDto productDto)
     {
-        var product = new Product(
+        // Arrange
+        var actual = new Product(
             _mapper.Map<ProductId>(productDto.Id),
             _mapper.Map<ProductName>(productDto.Name),
             _mapper.Map<ProductPrice>(productDto.Price),
@@ -112,9 +130,11 @@ public class ProductsBusinessMappingTest
             productDto.ManufactureDate,
             _mapper.Map<WarehouseId>(productDto.WarehouseId));
         
-        var mappedProductId = _mapper.Map<Product>(productDto);
+        // Act
+        var expected = _mapper.Map<Product>(productDto);
         
-        mappedProductId.Should().Be(product);
+        // Assert
+        Assert.Equal(expected, actual);
     }
     
     public static IEnumerable<object[]> ProductDtoData()

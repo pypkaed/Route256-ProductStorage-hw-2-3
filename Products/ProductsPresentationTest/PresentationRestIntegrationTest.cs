@@ -1,8 +1,6 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using FluentAssertions;
-using Grpc.Core;
 using Microsoft.AspNetCore.Mvc.Testing;
 using ProductGrpc;
 using Products;
@@ -25,8 +23,9 @@ public class PresentationRestIntegrationTest : IClassFixture<MockServiceWebAppli
     [InlineData(1)]
     [InlineData(145657)]
     [InlineData(131245678)]
-    public async Task RestGetProductByIdTest(long id)
+    public async Task RestGetProductById_Success(long id)
     {
+        // Arrange
         var webAppClient = _factory.CreateClient();
 
         var requestModel = new GetProductByIdRequest()
@@ -37,6 +36,7 @@ public class PresentationRestIntegrationTest : IClassFixture<MockServiceWebAppli
         var jsonRequest = JsonSerializer.Serialize(requestModel).ToLower();
         var request = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
 
+        // Act
         var response = await webAppClient.PostAsync("/v1/products/get-product-by-id", request);
 
         response.EnsureSuccessStatusCode();
@@ -47,8 +47,13 @@ public class PresentationRestIntegrationTest : IClassFixture<MockServiceWebAppli
             PropertyNameCaseInsensitive = true
         });
         
-        responseProduct.Should().NotBeNull();
-        responseProduct.Id.Should().Be(id);
+        // Assert
+        Assert.NotNull(responseProduct);
+
+        var expected = responseProduct.Id;
+        var actual = requestModel.Id;
+        
+        Assert.Equal(expected, actual);
     }
     
     
@@ -56,8 +61,9 @@ public class PresentationRestIntegrationTest : IClassFixture<MockServiceWebAppli
     [InlineData(0)]
     [InlineData(-1)]
     [InlineData(-123)]
-    public async Task RestGetProductById_ThrowsValidationException_Test(long id)
+    public async Task RestGetProductById_ThrowsValidationException(long id)
     {
+        // Arrange
         var webAppClient = _factory.CreateClient();
 
         var requestModel = new GetProductByIdRequest() 
@@ -68,21 +74,28 @@ public class PresentationRestIntegrationTest : IClassFixture<MockServiceWebAppli
         var jsonRequest = JsonSerializer.Serialize(requestModel).ToLower();
         var request = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
         
+        // Act
         var response = await webAppClient.PostAsync("/v1/products/get-product-by-id", request);
 
-        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+        // Assert
+        var expected = HttpStatusCode.InternalServerError;
+        var actual = response.StatusCode;
+        
+        Assert.Equal(expected, actual);
     }
 
     [Theory]
     [MemberData(nameof(CreateProductRequestJsonData))]
-    public async Task RestCreateProductTest(CreateProductRequestJson requestModel)
+    public async Task RestCreateProduct_Success(CreateProductRequestJson requestModel)
     {
+        // Arrange
         var factory = new WebApplicationFactory<Program>();
         var webAppClient = factory.CreateClient();
         
         var jsonRequest = JsonSerializer.Serialize(requestModel).ToLower();
         var request = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
     
+        // Act
         var response = await webAppClient.PostAsync("/v1/products/create-product", request);
         
         response.EnsureSuccessStatusCode();
@@ -93,8 +106,12 @@ public class PresentationRestIntegrationTest : IClassFixture<MockServiceWebAppli
             PropertyNameCaseInsensitive = true
         });
         
-        responseProduct.Should().NotBeNull();
-        responseProduct.Id.Should().Be((int)requestModel.Id);
+        // Assert
+        Assert.NotNull(responseProduct);
+
+        var expected = requestModel.Id;
+        var actual = responseProduct.Id;
+        Assert.Equal(expected, actual);
     }
     
     public static IEnumerable<object[]> CreateProductRequestJsonData()
@@ -155,16 +172,22 @@ public class PresentationRestIntegrationTest : IClassFixture<MockServiceWebAppli
     
     [Theory]
     [MemberData(nameof(CreateProductRequestJsonExceptionData))]
-    public async Task RestCreateProduct_ThrowValidationException_Test(CreateProductRequestJson requestModel)
+    public async Task RestCreateProduct_ThrowValidationException(CreateProductRequestJson requestModel)
     {
+        // Arrange
         var webAppClient = _factory.CreateClient();
         
         var jsonRequest = JsonSerializer.Serialize(requestModel).ToLower();
         var request = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
         
+        // Act
         var response = await webAppClient.PostAsync("/v1/products/create-product", request);
         
-        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+        // Assert
+        var expected = HttpStatusCode.InternalServerError;
+        var actual = response.StatusCode;
+        
+        Assert.Equal(expected, actual);
     }
     
     public static IEnumerable<object[]> CreateProductRequestJsonExceptionData()

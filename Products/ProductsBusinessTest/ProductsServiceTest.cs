@@ -29,9 +29,10 @@ public class ProductsServiceTest
     }
 
     [Fact]
-    public void CreateProductTest()
+    public void CreateProduct_Success()
     {
-        var productDto = new ProductDto(
+        // Arrange
+        var expected = new ProductDto(
             Id: 1,
             Name: "Krutoi Bober",
             Price: 123m,
@@ -39,14 +40,20 @@ public class ProductsServiceTest
             Category: "Food",
             ManufactureDate: DateOnly.MaxValue, 
             WarehouseId: 15);
-        _service.CreateProduct(productDto);
 
-        Assert.Equal(productDto, _service.GetProductById(productDto.Id));
+        _service.CreateProduct(expected);
+        
+        // Act
+        var actual = _service.GetProductById(expected.Id);
+
+        // Assert
+        Assert.Equal(expected, actual);
     } 
     
     [Fact]
-    public void CreateSameProduct_ThrowRepeatingProductException_Test()
+    public void CreateProduct_SameProduct_ThrowRepeatingProductException()
     {
+        // Arrange
         var productDto = new ProductDto(
             Id: 1,
             Name: "Krutoi Bober",
@@ -55,8 +62,11 @@ public class ProductsServiceTest
             Category: "Food",
             ManufactureDate: DateOnly.MaxValue, 
             WarehouseId: 15);
+        
+        // Act
         _service.CreateProduct(productDto);
 
+        // Assert
         Assert.Throws<RepositoryException>(() =>
         {
             _service.CreateProduct(productDto);
@@ -65,12 +75,14 @@ public class ProductsServiceTest
     
     [Theory]
     [MemberData(nameof(ProductDtoExceptionData))]
-    public void CreateProductWithSameId_ThrowRepeatingProductException_Test(
+    public void CreateProduct_ExistingId_ThrowRepeatingProductException(
         ProductDto productDto,
         ProductDto otherProductDto)
     {
+        // Act
         _service.CreateProduct(productDto);
 
+        // Assert
         Assert.Throws<RepositoryException>(() =>
         {
             _service.CreateProduct(otherProductDto);
@@ -101,8 +113,9 @@ public class ProductsServiceTest
     }
 
     [Fact]
-    public void GetProductByIdTest()
+    public void GetProductById_Success()
     {
+        // Arrange
         var productId = 1;
         
         var product = new Product(
@@ -116,7 +129,7 @@ public class ProductsServiceTest
 
         var service = MockRepository.InitializeServiceWithMockRepositoryGetById(product);
         
-        var productDto = new ProductDto(
+        var expected = new ProductDto(
             Id: productId,
             Name: "Krutoi Bober",
             Price: 15.6m,
@@ -125,11 +138,15 @@ public class ProductsServiceTest
             ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
             WarehouseId: 124);
 
-        Assert.Equal(productDto, service.GetProductById(productDto.Id));
+        // Act
+        var actual = service.GetProductById(expected.Id);
+        
+        // Assert
+        Assert.Equal(expected, actual);
     }
     
     [Fact]
-    public void GetProductById_ThrowProductNotFoundException_Test()
+    public void GetProductById_ThrowProductNotFoundException()
     {
         Assert.Throws<RepositoryException>(() =>
         {
@@ -139,12 +156,15 @@ public class ProductsServiceTest
 
     [Theory]
     [MemberData(nameof(ProductDtoData))]
-    public void DeleteProductByIdTest(ProductDto productDto)
+    public void DeleteProductById_Success(ProductDto productDto)
     {
+        // Arrange
         _service.CreateProduct(productDto);
         
+        // Act
         _service.DeleteProductById(productDto.Id);
 
+        // Assert
         Assert.Throws<RepositoryException>(() =>
         {
             _service.GetProductById(productDto.Id);
@@ -189,7 +209,7 @@ public class ProductsServiceTest
     }
     
     [Fact]
-    public void DeleteProductById_ThrowProductNotFoundException_Test()
+    public void DeleteProductById_ThrowProductNotFoundException()
     {
         Assert.Throws<RepositoryException>(() =>
         {
@@ -199,19 +219,22 @@ public class ProductsServiceTest
 
     [Theory]
     [MemberData(nameof(ProductDtoData))]
-    public void UpdateProductPriceTest(ProductDto productDto)
+    public void UpdateProductPrice_Success(ProductDto productDto)
     {
+        // Arrange
         _service.CreateProduct(productDto);
+        var expected = 1434.3m;
+        
+        // Act
+        _service.UpdateProductPrice(productDto.Id, expected);
 
-        var newPrice = 1434.3m;
-        _service.UpdateProductPrice(productDto.Id, newPrice);
-
-        var resultPrice = _service.GetProductById(productDto.Id).Price;
-        Assert.Equal(newPrice, resultPrice);
+        // Assert
+        var actual = _service.GetProductById(productDto.Id).Price;
+        Assert.Equal(expected, actual);
     }
     
     [Fact]
-    public void UpdateProductPrice_ThrowProductNotFoundException_Test()
+    public void UpdateProductPrice_ThrowProductNotFoundException()
     {
         Assert.Throws<RepositoryException>(() =>
         {
@@ -220,16 +243,18 @@ public class ProductsServiceTest
     }
 
     [Fact]
-    public void GetProductsFiltered_AllFilters_Test()
+    public void GetProductsFiltered_AllFilters_Success()
     {
+        // Arrange   
         var filters = new FiltersDto()
         {
             ProductManufactureDateFilter = DateOnly.FromDateTime(DateTime.Now),
             ProductCategoryFilter = "Food",
             ProductWarehouseIdFilter = 123,
         };
-
-        var products = new List<ProductDto>();
+        var expected = new List<ProductDto>();
+        
+        // Act
         for (long productId = 1; productId < 50; productId++)
         {
             var productDto = new ProductDto(
@@ -241,7 +266,7 @@ public class ProductsServiceTest
                 ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
                 WarehouseId: 123);
             
-            products.Add(productDto);
+            expected.Add(productDto);
             _service.CreateProduct(productDto);
         }
         for (long productId = 50; productId < 100; productId++)
@@ -257,22 +282,26 @@ public class ProductsServiceTest
             
             _service.CreateProduct(productDto);
         }
+        
+        // Assert
 
-        var result = _service.GetProductsFiltered(filters);
-        Assert.Equal(products, result);
+        var actual = _service.GetProductsFiltered(filters);
+        Assert.Equal(expected, actual);
     }
 
     [Fact]
-    public void GetProductsFiltered_GetPage_AllFilters_Test()
+    public void GetProductsFiltered_GetPage_AllFilters_Success()
     {
+        // Arrange
         var filters = new FiltersDto()
         {
             ProductManufactureDateFilter = DateOnly.FromDateTime(DateTime.Now),
             ProductCategoryFilter = "Food",
             ProductWarehouseIdFilter = 123,
         };
-
-        var products = new List<ProductDto>();
+        var expected = new List<ProductDto>();
+        
+        // Act
         for (long productId = 0; productId < 50; productId++)
         {
             var productDto = new ProductDto(
@@ -284,7 +313,7 @@ public class ProductsServiceTest
                 ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
                 WarehouseId: 123);
             
-            products.Add(productDto);
+            expected.Add(productDto);
             _service.CreateProduct(productDto);
         }
         for (long productId = 50; productId < 100; productId++)
@@ -300,20 +329,23 @@ public class ProductsServiceTest
             
             _service.CreateProduct(productDto);
         }
-
-        var filteredResult = _service.GetProductsFiltered(filters);
-        Assert.Equal(products.Take(3), _service.GetPage(1, 3, filteredResult));
+        
+        // Assert
+        var actual = _service.GetProductsFiltered(filters);
+        Assert.Equal(expected.Take(3), _service.GetPage(1, 3, actual));
     }
     
     [Fact]
-    public void GetProductsFiltered_ProductManufactureDateFilter_AllProductsResult_Test()
+    public void GetProductsFiltered_ProductManufactureDateFilter_AllProductsResult_Success()
     {
+        // Arrange
         var filters = new FiltersDto()
         {
             ProductManufactureDateFilter = DateOnly.FromDateTime(DateTime.Now)
         };
-
-        var products = new List<ProductDto>();
+        var expected = new List<ProductDto>();
+        
+        // Act
         for (long productId = 1; productId < 50; productId++)
         {
             var productDto = new ProductDto(
@@ -325,7 +357,7 @@ public class ProductsServiceTest
                 ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
                 WarehouseId: 123);
             
-            products.Add(productDto);
+            expected.Add(productDto);
             _service.CreateProduct(productDto);
         }
         for (long productId = 50; productId < 100; productId++)
@@ -342,19 +374,22 @@ public class ProductsServiceTest
             _service.CreateProduct(productDto);
         }
 
-        var result = _service.GetProductsFiltered(filters);
-        Assert.Equal(products, result);
+        // Assert
+        var actual = _service.GetProductsFiltered(filters);
+        Assert.Equal(expected, actual);
     }
 
     [Fact]
-    public void GetProductsFiltered_GetPage_ProductManufactureDateFilter_AllProductsResult_Test()
+    public void GetProductsFiltered_GetPage_ProductManufactureDateFilter_AllProductsResult_Success()
     {
+        // Arrange
         var filters = new FiltersDto()
         {
             ProductManufactureDateFilter = DateOnly.FromDateTime(DateTime.Now)
         };
-
-        var products = new List<ProductDto>();
+        var expected = new List<ProductDto>();
+        
+        // Act
         for (long productId = 1; productId < 50; productId++)
         {
             var productDto = new ProductDto(
@@ -366,7 +401,7 @@ public class ProductsServiceTest
                 ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
                 WarehouseId: 123);
             
-            products.Add(productDto);
+            expected.Add(productDto);
             _service.CreateProduct(productDto);
         }
         for (long productId = 50; productId < 100; productId++)
@@ -383,20 +418,23 @@ public class ProductsServiceTest
             _service.CreateProduct(productDto);
         }
 
+        // Assert
         var filteredResult = _service.GetProductsFiltered(filters);
-        var result = _service.GetPage(1, 3, filteredResult);
+        var actual = _service.GetPage(1, 3, filteredResult);
 
-        Assert.Equal(products.Take(3), result);
+        Assert.Equal(expected.Take(3), actual);
     }
     [Fact]
-    public void GetProductsFiltered_ProductCategoryFilter_AllProductsResult_Test()
+    public void GetProductsFiltered_ProductCategoryFilter_AllProductsResult_Success()
     {
+        // Arrange
         var filters = new FiltersDto()
         {
             ProductCategoryFilter = "Food"
         };
-
-        var products = new List<ProductDto>();
+        var expected = new List<ProductDto>();
+        
+        // Act
         for (long productId = 1; productId < 50; productId++)
         {
             var productDto = new ProductDto(
@@ -408,7 +446,7 @@ public class ProductsServiceTest
                 ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
                 WarehouseId: 123);
             
-            products.Add(productDto);
+            expected.Add(productDto);
             _service.CreateProduct(productDto);
         }
         for (long productId = 50; productId < 100; productId++)
@@ -425,19 +463,22 @@ public class ProductsServiceTest
             _service.CreateProduct(productDto);
         }
 
-        var result = _service.GetProductsFiltered(filters);
-        Assert.Equal(products, result);
+        // Assert
+        var actual = _service.GetProductsFiltered(filters);
+        Assert.Equal(expected, actual);
     }
 
     [Fact]
-    public void GetProductsFiltered_GetPage_AllFilters_AllProductsResult_Test()
+    public void GetProductsFiltered_GetPage_AllFilters_AllProductsResult_Success()
     {
+        // Arrange
         var filters = new FiltersDto()
         {
             ProductCategoryFilter = "Food"
         };
-
-        var products = new List<ProductDto>();
+        var expected = new List<ProductDto>();
+        
+        // Act
         for (long productId = 1; productId < 50; productId++)
         {
             var productDto = new ProductDto(
@@ -449,7 +490,7 @@ public class ProductsServiceTest
                 ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
                 WarehouseId: 123);
             
-            products.Add(productDto);
+            expected.Add(productDto);
             _service.CreateProduct(productDto);
         }
         for (long productId = 50; productId < 100; productId++)
@@ -466,20 +507,23 @@ public class ProductsServiceTest
             _service.CreateProduct(productDto);
         }
 
+        // Assert
         var filteredResult = _service.GetProductsFiltered(filters);
-        var result = _service.GetPage(1, 3, filteredResult);
-        Assert.Equal(products.Take(3), result);
+        var actual = _service.GetPage(1, 3, filteredResult);
+        Assert.Equal(expected.Take(3), actual);
     }
     
     [Fact]
-    public void GetProductsFiltered_ProductWarehouseIdFilter_AllProductsResult_Test()
+    public void GetProductsFiltered_ProductWarehouseIdFilter_AllProductsResult_Success()
     {
+        // Arrange
         var filters = new FiltersDto()
         {
             ProductWarehouseIdFilter = 123
         };
+        var expected = new List<ProductDto>();
         
-        var products = new List<ProductDto>();
+        // Act
         for (long productId = 1; productId < 50; productId++)
         {
             var productDto = new ProductDto(
@@ -491,7 +535,7 @@ public class ProductsServiceTest
                 ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
                 WarehouseId: 123);
             
-            products.Add(productDto);
+            expected.Add(productDto);
             _service.CreateProduct(productDto);
         }
         for (long productId = 50; productId < 100; productId++)
@@ -508,19 +552,22 @@ public class ProductsServiceTest
             _service.CreateProduct(productDto);
         }
 
-        
-        Assert.Equal(products, _service.GetProductsFiltered(filters));
+        // Assert
+        var actual = _service.GetProductsFiltered(filters);
+        Assert.Equal(expected, actual);
     }
     
     [Fact]
-    public void GetProductsFiltered_GetPage_ProductWarehouseIdFilter_AllProductsResult_Test()
+    public void GetProductsFiltered_GetPage_ProductWarehouseIdFilter_AllProductsResult_Success()
     {
+        // Arrange
         var filters = new FiltersDto()
         {
             ProductWarehouseIdFilter = 123
         };
-            
-        var products = new List<ProductDto>();
+        var expected = new List<ProductDto>();
+        
+        // Act
         for (long productId = 1; productId < 50; productId++)
         {
             var productDto = new ProductDto(
@@ -532,7 +579,7 @@ public class ProductsServiceTest
                 ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
                 WarehouseId: 123);
                     
-            products.Add(productDto);
+            expected.Add(productDto);
             _service.CreateProduct(productDto);
         }
         for (long productId = 50; productId < 100; productId++)
@@ -549,8 +596,9 @@ public class ProductsServiceTest
             _service.CreateProduct(productDto);
         }
     
+        // Assert
         var filteredResult = _service.GetProductsFiltered(filters);
-        var result = _service.GetPage(1, 3, filteredResult);
-        Assert.Equal(products.Take(3), result);
+        var actual = _service.GetPage(1, 3, filteredResult);
+        Assert.Equal(expected.Take(3), actual);
     }
 }
