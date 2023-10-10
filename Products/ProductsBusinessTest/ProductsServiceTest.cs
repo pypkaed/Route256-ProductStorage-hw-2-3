@@ -1,4 +1,5 @@
 using AutoMapper;
+using Moq;
 using ProductsBusiness.Dto;
 using ProductsBusiness.Profiles;
 using ProductsBusiness.Services;
@@ -7,170 +8,120 @@ using ProductsDao.Exceptions;
 using ProductsDao.Models;
 using ProductsDao.Repositories;
 using Xunit;
-using MockRepository = ProductsBusinessTest.Helpers.MockRepository;
 
 namespace ProductsBusinessTest;
 
 public class ProductsServiceTest
 {
-    private readonly IProductService _service;
-
+    private readonly IMapper _mapper;
+    
     public ProductsServiceTest()
     {
         var mapperConfiguration = new MapperConfiguration(expression =>
         {
             expression.AddProfile<ProductProfile>();
         });
-
-        var mapper = new Mapper(mapperConfiguration);
-        var repository = new ProductInMemoryRepository();
-        
-        _service = new ProductService(repository, mapper);
+        _mapper = new Mapper(mapperConfiguration);
     }
 
-    [Fact]
-    public void CreateProduct_Success()
+    [Theory]
+    [InlineData(1)]
+    [InlineData(123)]
+    [InlineData(12345)]
+    public void GetProductById(long id)
     {
         // Arrange
-        var expected = new ProductDto(
-            Id: 1,
-            Name: "Krutoi Bober",
-            Price: 123m,
-            Weight: 14, 
-            Category: "Food",
-            ManufactureDate: DateOnly.MaxValue, 
-            WarehouseId: 15);
-
-        _service.CreateProduct(expected);
+        var repositoryMock = new Mock<IProductRepository>();
+        repositoryMock.Setup(repository => repository.GetById(It.IsAny<ProductId>()))
+            .Returns<ProductId>(id =>
+                InitializeProduct(id.Id,
+                    "SomeName",
+                    123.2m,
+                    1.42,
+                    ProductCategory.Chemicals,
+                    DateOnly.MinValue,
+                    234));
         
-        // Act
-        var actual = _service.GetProductById(expected.Id);
+        var service = new ProductService(repositoryMock.Object, _mapper);
 
-        // Assert
-        Assert.Equal(expected, actual);
-    } 
-    
-    [Fact]
-    public void CreateProduct_SameProduct_ThrowRepeatingProductException()
-    {
-        // Arrange
-        var productDto = new ProductDto(
-            Id: 1,
-            Name: "Krutoi Bober",
-            Price: 123m,
-            Weight: 14, 
-            Category: "Food",
-            ManufactureDate: DateOnly.MaxValue, 
-            WarehouseId: 15);
+        // Act
+        service.GetProductById(id);
         
-        // Act
-        _service.CreateProduct(productDto);
-
         // Assert
-        Assert.Throws<RepositoryException>(() =>
-        {
-            _service.CreateProduct(productDto);
-        });
-    } 
+        repositoryMock.Verify(repository => repository.GetById(new ProductId(id)), Times.Once);
+    }
     
     [Theory]
-    [MemberData(nameof(ProductDtoExceptionData))]
-    public void CreateProduct_ExistingId_ThrowRepeatingProductException(
-        ProductDto productDto,
-        ProductDto otherProductDto)
-    {
-        // Act
-        _service.CreateProduct(productDto);
-
-        // Assert
-        Assert.Throws<RepositoryException>(() =>
-        {
-            _service.CreateProduct(otherProductDto);
-        });
-    }
-
-    public static IEnumerable<object[]> ProductDtoExceptionData()
-    {
-        yield return new object[]
-        {
-            new ProductDto(
-                Id: 1,
-                Name: "Krutoi Bober",
-                Price: 123m,
-                Weight: 14,
-                Category: "Food",
-                ManufactureDate: DateOnly.MaxValue,
-                WarehouseId: 15),
-            new ProductDto(
-                Id: 1,
-                Name: "Lame Bober",
-                Price: 13m,
-                Weight: 4,
-                Category: "Electronics",
-                ManufactureDate: DateOnly.MinValue,
-                WarehouseId: 1)
-        };
-    }
-
-    [Fact]
-    public void GetProductById_Success()
+    [InlineData(0)]
+    [InlineData(-1)]
+    [InlineData(-12345)]
+    public void GetProductById_ThrowProductDoesNotExistException(long id)
     {
         // Arrange
-        var productId = 1;
+        var repositoryMock = new Mock<IProductRepository>();
+        repositoryMock.Setup(repository =>
+                repository.GetById(It.Is<ProductId>(id => id.Id <= 0)))
+            .Throws(RepositoryException.ProductDoesNotExists);
         
-        var product = new Product(
-            new ProductId(productId),
-            new ProductName("Krutoi Bober"),
-            new ProductPrice(15.6m),
-            new ProductWeight(12), 
-            ProductCategory.Chemicals,
-            DateOnly.FromDateTime(DateTime.Now),
-            new WarehouseId(124));
-
-        var service = MockRepository.InitializeServiceWithMockRepositoryGetById(product);
-        
-        var expected = new ProductDto(
-            Id: productId,
-            Name: "Krutoi Bober",
-            Price: 15.6m,
-            Weight: 12, 
-            Category: "Chemicals",
-            ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
-            WarehouseId: 124);
-
-        // Act
-        var actual = service.GetProductById(expected.Id);
+        var service = new ProductService(repositoryMock.Object, _mapper);
         
         // Assert
-        Assert.Equal(expected, actual);
-    }
-    
-    [Fact]
-    public void GetProductById_ThrowProductNotFoundException()
-    {
-        Assert.Throws<RepositoryException>(() =>
-        {
-            _service.GetProductById(1);
-        });
+        Assert.Throws<RepositoryException>(() => service.GetProductById(id));
+        
+        repositoryMock.Verify(repository => repository.GetById(new ProductId(id)), Times.Once);
     }
 
     [Theory]
     [MemberData(nameof(ProductDtoData))]
-    public void DeleteProductById_Success(ProductDto productDto)
+    public void CreateProduct(ProductDto productDto)
     {
         // Arrange
-        _service.CreateProduct(productDto);
+        var repositoryMock = new Mock<IProductRepository>();
+        repositoryMock.Setup(repository => repository.Insert(It.IsAny<Product>()))
+            .Returns<Product>(product => product);
+        
+        var service = new ProductService(repositoryMock.Object, _mapper);
         
         // Act
-        _service.DeleteProductById(productDto.Id);
+        service.CreateProduct(productDto);
 
         // Assert
-        Assert.Throws<RepositoryException>(() =>
-        {
-            _service.GetProductById(productDto.Id);
-        });
+        repositoryMock.Verify(repository =>
+            repository.Insert(_mapper.Map<Product>(productDto)), Times.Once);
     }
+    
+    [Theory]
+    [MemberData(nameof(ProductDtoExceptionData))]
+    public void CreateProduct_ThrowProductAlreadyExistsException(ProductDto productDto, ProductDto otherProductDto)
+    {
+        // Arrange
+        var methodCalls = 0;
+        
+        var repositoryMock = new Mock<IProductRepository>();
+        repositoryMock.Setup(repository => repository.Insert(It.IsAny<Product>()))
+            .Returns<Product>(product =>
+            {
+                if (methodCalls >= 1)
+                {
+                    throw RepositoryException.ProductAlreadyExists(product.Id);
+                }
 
+                methodCalls++;
+                return product;
+            });
+        
+        var service = new ProductService(repositoryMock.Object, _mapper);
+        
+        // Act
+        service.CreateProduct(productDto);
+        
+        // Assert
+        Assert.Throws<RepositoryException>(() => service.CreateProduct(productDto));
+
+        repositoryMock.Verify(repository =>
+            repository.Insert(_mapper.Map<Product>(productDto)), Times.Exactly(2));
+    }
+    
     public static IEnumerable<object[]> ProductDtoData()
     {
         yield return new object[]
@@ -207,398 +158,249 @@ public class ProductsServiceTest
                 WarehouseId: 124)
         };
     }
-    
-    [Fact]
-    public void DeleteProductById_ThrowProductNotFoundException()
+
+    public static IEnumerable<object[]> ProductDtoExceptionData()
     {
-        Assert.Throws<RepositoryException>(() =>
+        yield return new object[]
         {
-            _service.GetProductById(1);
-        });
+            new ProductDto(
+                Id: 1,
+                Name: "Krutoi Bober",
+                Price: 15.6m,
+                Weight: 12,
+                Category: "Chemicals",
+                ManufactureDate: DateOnly.FromDateTime(DateTime.Now),
+                WarehouseId: 124),
+            new ProductDto(
+                Id: 1,
+                Name: "Ne krutoi :(",
+                Price: 15.6333m,
+                Weight: 11322,
+                Category: "Food",
+                ManufactureDate: DateOnly.FromDateTime(DateTime.Now),
+                WarehouseId: 1256)
+        };
     }
 
     [Theory]
-    [MemberData(nameof(ProductDtoData))]
-    public void UpdateProductPrice_Success(ProductDto productDto)
+    [InlineData(1)]
+    [InlineData(123)]
+    [InlineData(12345)]
+    public void DeleteProductById(long id)
     {
         // Arrange
-        _service.CreateProduct(productDto);
-        var expected = 1434.3m;
+        var repositoryMock = new Mock<IProductRepository>();
+        repositoryMock.Setup(repository => repository.GetById(It.IsAny<ProductId>()))
+            .Returns<ProductId>(productId =>
+                InitializeProduct(
+                    productId.Id,
+                    "SomeName",
+                    123.2m,
+                    1.42,
+                    ProductCategory.Chemicals,
+                    DateOnly.MinValue,
+                    234));
         
+        repositoryMock.Setup(repository => repository.DeleteById(It.IsAny<ProductId>()));
+
+        var service = new ProductService(repositoryMock.Object, _mapper);
+
         // Act
-        _service.UpdateProductPrice(productDto.Id, expected);
+        service.DeleteProductById(id);
+        
+        // Assert
+        repositoryMock.Verify(repository => repository.DeleteById(new ProductId(id)), Times.Once);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(123)]
+    [InlineData(12345)]
+    public void DeleteProductById_ThrowProductDoesNotExistException(long id)
+    {
+        // Arrange
+        var repositoryMock = new Mock<IProductRepository>();
+        repositoryMock.Setup(repository => repository.DeleteById(It.IsAny<ProductId>()))
+            .Throws(RepositoryException.ProductDoesNotExists);;
+
+        var service = new ProductService(repositoryMock.Object, _mapper);
 
         // Assert
-        var actual = _service.GetProductById(productDto.Id).Price;
-        Assert.Equal(expected, actual);
+        Assert.Throws<RepositoryException>(() => service.DeleteProductById(id));
+        
+        repositoryMock.Verify(repository => repository.DeleteById(new ProductId(id)), Times.Once);
+    }
+
+    [Theory]
+    [InlineData(1, 1234)]
+    [InlineData(2, 1234.4)]
+    [InlineData(215, 2334.234)]
+    public void UpdateProductPrice(long id, decimal price)
+    {
+        // Arrange
+        var repositoryMock = new Mock<IProductRepository>();
+        repositoryMock.Setup(repository => repository.GetById(It.IsAny<ProductId>()))
+            .Returns<ProductId>(productId =>
+                InitializeProduct(
+                    productId.Id,
+                    "SomeName",
+                    123.2m,
+                    1.42,
+                    ProductCategory.Chemicals,
+                    DateOnly.MinValue,
+                    234));
+        repositoryMock.Setup(repository => repository.Update(It.IsAny<Product>()))
+            .Returns<Product>(product => product);
+        
+        var service = new ProductService(repositoryMock.Object, _mapper);
+
+        // Act
+        service.UpdateProductPrice(id, price);
+        
+        // Assert
+        repositoryMock.Verify(repository => repository.GetById(new ProductId(id)), Times.Once);
+        
+        repositoryMock.Verify(repository =>
+            repository.Update(InitializeProduct(
+                id,
+                "SomeName",
+                price,
+                1.42,
+                ProductCategory.Chemicals,
+                DateOnly.MinValue,
+                234)), 
+            Times.Once);
+    }
+
+    [Theory]
+    [InlineData(1, 1234)]
+    public void UpdateProductPrice_ThrowProductDoesNotExistException(long id, decimal price)
+    {
+        // Arrange
+        var repositoryMock = new Mock<IProductRepository>();
+        repositoryMock.Setup(repository => repository.GetById(It.IsAny<ProductId>()))
+            .Throws(RepositoryException.ProductDoesNotExists);
+        repositoryMock.Setup(repository => repository.Update(It.IsAny<Product>()))
+            .Returns<Product>(product => product);
+        
+        var service = new ProductService(repositoryMock.Object, _mapper);
+
+        // Assert
+        Assert.Throws<RepositoryException>(() => service.UpdateProductPrice(id, price));
+        
+        repositoryMock.Verify(repository => repository.GetById(new ProductId(id)), Times.Once);
+        
+        repositoryMock.Verify(repository =>
+            repository.Update(InitializeProduct(
+                id,
+                "SomeName",
+                price,
+                1.42,
+                ProductCategory.Chemicals,
+                DateOnly.MinValue,
+                234)), 
+            Times.Never);
+    }
+
+    [Theory]
+    [MemberData(nameof(FiltersDtoData))]
+    public void GetProductsFiltered(FiltersDto filtersDto)
+    {
+        // Arrange
+        var repositoryMock = new Mock<IProductRepository>();
+        repositoryMock.Setup(repository => repository.GetAll())
+            .Returns(new Dictionary<ProductId, Product>()
+            {
+                { new ProductId(1),
+                    InitializeProduct(
+                        1,
+                        "Goofy aah",
+                        123.2m,
+                        1.42,
+                        ProductCategory.Chemicals,
+                        DateOnly.MinValue,
+                        234) },
+                { new ProductId(2),
+                    InitializeProduct(
+                        2,
+                        "Sad oh",
+                        123.2m,
+                        1.42,
+                        ProductCategory.Food,
+                        DateOnly.MinValue,
+                        234) },
+                { new ProductId(3),
+                    InitializeProduct(
+                        3,
+                        "Monkey sheesh",
+                        123.2m,
+                        1.42,
+                        ProductCategory.Chemicals,
+                        DateOnly.MinValue,
+                        234) },
+            });
+
+        var service = new ProductService(repositoryMock.Object, _mapper);
+
+        // Act
+        service.GetProductsFiltered(filtersDto);
+        
+        // Assert
+        repositoryMock.Verify(repository => repository.GetAll(), Times.Once);
+    }
+
+    public static IEnumerable<object[]> FiltersDtoData()
+    {
+        yield return new object[]
+        {
+            new FiltersDto()
+            {
+                ProductManufactureDateFilter = DateOnly.FromDateTime(DateTime.Now)
+            }
+        };
+        yield return new object[]
+        {
+            new FiltersDto()
+            {
+                ProductManufactureDateFilter = DateOnly.FromDateTime(DateTime.Now),
+                ProductCategoryFilter = "Food",
+                ProductWarehouseIdFilter = 123
+            }
+        };
+        yield return new object[]
+        {
+            new FiltersDto()
+            {
+                ProductWarehouseIdFilter = 123
+            }
+        };
+        yield return new object[]
+        {
+            new FiltersDto()
+            {
+                ProductCategoryFilter = "Food",
+            }
+        };
     }
     
-    [Fact]
-    public void UpdateProductPrice_ThrowProductNotFoundException()
+    private Product InitializeProduct(
+        long productId,
+        string productName,
+        decimal productPrice,
+        double productWeight,
+        ProductCategory productCategory,
+        DateOnly productManufactureDate,
+        long warehouseId) 
     {
-        Assert.Throws<RepositoryException>(() =>
-        {
-            _service.UpdateProductPrice(1, 123m);
-        });
-    }
+        var product = new Product(
+            new ProductId(productId),
+            new ProductName(productName),
+            new ProductPrice(productPrice),
+            new ProductWeight(productWeight),
+            productCategory,
+            productManufactureDate,
+            new WarehouseId(warehouseId));
 
-    [Fact]
-    public void GetProductsFiltered_AllFilters_Success()
-    {
-        // Arrange   
-        var filters = new FiltersDto()
-        {
-            ProductManufactureDateFilter = DateOnly.FromDateTime(DateTime.Now),
-            ProductCategoryFilter = "Food",
-            ProductWarehouseIdFilter = 123,
-        };
-        var expected = new List<ProductDto>();
-        
-        // Act
-        for (long productId = 1; productId < 50; productId++)
-        {
-            var productDto = new ProductDto(
-                Id: productId,
-                Name: "Krutoi Bober",
-                Price: 15.6m,
-                Weight: 12, 
-                Category: "Food",
-                ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
-                WarehouseId: 123);
-            
-            expected.Add(productDto);
-            _service.CreateProduct(productDto);
-        }
-        for (long productId = 50; productId < 100; productId++)
-        {
-            var productDto = new ProductDto(
-                Id: productId,
-                Name: "Krutoi Bober",
-                Price: 15.6m,
-                Weight: 12, 
-                Category: "Chemicals",
-                ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
-                WarehouseId: 123);
-            
-            _service.CreateProduct(productDto);
-        }
-        
-        // Assert
-
-        var actual = _service.GetProductsFiltered(filters);
-        Assert.Equal(expected, actual);
-    }
-
-    [Fact]
-    public void GetProductsFiltered_GetPage_AllFilters_Success()
-    {
-        // Arrange
-        var filters = new FiltersDto()
-        {
-            ProductManufactureDateFilter = DateOnly.FromDateTime(DateTime.Now),
-            ProductCategoryFilter = "Food",
-            ProductWarehouseIdFilter = 123,
-        };
-        var expected = new List<ProductDto>();
-        
-        // Act
-        for (long productId = 0; productId < 50; productId++)
-        {
-            var productDto = new ProductDto(
-                Id: productId,
-                Name: "Krutoi Bober",
-                Price: 15.6m,
-                Weight: 12, 
-                Category: "Food",
-                ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
-                WarehouseId: 123);
-            
-            expected.Add(productDto);
-            _service.CreateProduct(productDto);
-        }
-        for (long productId = 50; productId < 100; productId++)
-        {
-            var productDto = new ProductDto(
-                Id: productId,
-                Name: "Krutoi Bober",
-                Price: 15.6m,
-                Weight: 12, 
-                Category: "Chemicals",
-                ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
-                WarehouseId: 123);
-            
-            _service.CreateProduct(productDto);
-        }
-        
-        // Assert
-        var actual = _service.GetProductsFiltered(filters);
-        Assert.Equal(expected.Take(3), _service.GetPage(1, 3, actual));
-    }
-    
-    [Fact]
-    public void GetProductsFiltered_ProductManufactureDateFilter_AllProductsResult_Success()
-    {
-        // Arrange
-        var filters = new FiltersDto()
-        {
-            ProductManufactureDateFilter = DateOnly.FromDateTime(DateTime.Now)
-        };
-        var expected = new List<ProductDto>();
-        
-        // Act
-        for (long productId = 1; productId < 50; productId++)
-        {
-            var productDto = new ProductDto(
-                Id: productId,
-                Name: "Krutoi Bober",
-                Price: 15.6m,
-                Weight: 12, 
-                Category: "Food",
-                ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
-                WarehouseId: 123);
-            
-            expected.Add(productDto);
-            _service.CreateProduct(productDto);
-        }
-        for (long productId = 50; productId < 100; productId++)
-        {
-            var productDto = new ProductDto(
-                Id: productId,
-                Name: "Krutoi Bober",
-                Price: 15.6m,
-                Weight: 12, 
-                Category: "Food",
-                ManufactureDate: DateOnly.FromDateTime(DateTime.Now.AddDays(13)), 
-                WarehouseId: 123);
-            
-            _service.CreateProduct(productDto);
-        }
-
-        // Assert
-        var actual = _service.GetProductsFiltered(filters);
-        Assert.Equal(expected, actual);
-    }
-
-    [Fact]
-    public void GetProductsFiltered_GetPage_ProductManufactureDateFilter_AllProductsResult_Success()
-    {
-        // Arrange
-        var filters = new FiltersDto()
-        {
-            ProductManufactureDateFilter = DateOnly.FromDateTime(DateTime.Now)
-        };
-        var expected = new List<ProductDto>();
-        
-        // Act
-        for (long productId = 1; productId < 50; productId++)
-        {
-            var productDto = new ProductDto(
-                Id: productId,
-                Name: "Krutoi Bober",
-                Price: 15.6m,
-                Weight: 12, 
-                Category: "Food",
-                ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
-                WarehouseId: 123);
-            
-            expected.Add(productDto);
-            _service.CreateProduct(productDto);
-        }
-        for (long productId = 50; productId < 100; productId++)
-        {
-            var productDto = new ProductDto(
-                Id: productId,
-                Name: "Krutoi Bober",
-                Price: 15.6m,
-                Weight: 12, 
-                Category: "Food",
-                ManufactureDate: DateOnly.FromDateTime(DateTime.Now.AddDays(13)), 
-                WarehouseId: 123);
-            
-            _service.CreateProduct(productDto);
-        }
-
-        // Assert
-        var filteredResult = _service.GetProductsFiltered(filters);
-        var actual = _service.GetPage(1, 3, filteredResult);
-
-        Assert.Equal(expected.Take(3), actual);
-    }
-    [Fact]
-    public void GetProductsFiltered_ProductCategoryFilter_AllProductsResult_Success()
-    {
-        // Arrange
-        var filters = new FiltersDto()
-        {
-            ProductCategoryFilter = "Food"
-        };
-        var expected = new List<ProductDto>();
-        
-        // Act
-        for (long productId = 1; productId < 50; productId++)
-        {
-            var productDto = new ProductDto(
-                Id: productId,
-                Name: "Krutoi Bober",
-                Price: 15.6m,
-                Weight: 12, 
-                Category: "Food",
-                ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
-                WarehouseId: 123);
-            
-            expected.Add(productDto);
-            _service.CreateProduct(productDto);
-        }
-        for (long productId = 50; productId < 100; productId++)
-        {
-            var productDto = new ProductDto(
-                Id: productId,
-                Name: "Krutoi Bober",
-                Price: 15.6m,
-                Weight: 12, 
-                Category: "Chemicals",
-                ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
-                WarehouseId: 123);
-            
-            _service.CreateProduct(productDto);
-        }
-
-        // Assert
-        var actual = _service.GetProductsFiltered(filters);
-        Assert.Equal(expected, actual);
-    }
-
-    [Fact]
-    public void GetProductsFiltered_GetPage_AllFilters_AllProductsResult_Success()
-    {
-        // Arrange
-        var filters = new FiltersDto()
-        {
-            ProductCategoryFilter = "Food"
-        };
-        var expected = new List<ProductDto>();
-        
-        // Act
-        for (long productId = 1; productId < 50; productId++)
-        {
-            var productDto = new ProductDto(
-                Id: productId,
-                Name: "Krutoi Bober",
-                Price: 15.6m,
-                Weight: 12, 
-                Category: "Food",
-                ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
-                WarehouseId: 123);
-            
-            expected.Add(productDto);
-            _service.CreateProduct(productDto);
-        }
-        for (long productId = 50; productId < 100; productId++)
-        {
-            var productDto = new ProductDto(
-                Id: productId,
-                Name: "Krutoi Bober",
-                Price: 15.6m,
-                Weight: 12, 
-                Category: "Chemicals",
-                ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
-                WarehouseId: 123);
-            
-            _service.CreateProduct(productDto);
-        }
-
-        // Assert
-        var filteredResult = _service.GetProductsFiltered(filters);
-        var actual = _service.GetPage(1, 3, filteredResult);
-        Assert.Equal(expected.Take(3), actual);
-    }
-    
-    [Fact]
-    public void GetProductsFiltered_ProductWarehouseIdFilter_AllProductsResult_Success()
-    {
-        // Arrange
-        var filters = new FiltersDto()
-        {
-            ProductWarehouseIdFilter = 123
-        };
-        var expected = new List<ProductDto>();
-        
-        // Act
-        for (long productId = 1; productId < 50; productId++)
-        {
-            var productDto = new ProductDto(
-                Id: productId,
-                Name: "Krutoi Bober",
-                Price: 15.6m,
-                Weight: 12, 
-                Category: "Food",
-                ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
-                WarehouseId: 123);
-            
-            expected.Add(productDto);
-            _service.CreateProduct(productDto);
-        }
-        for (long productId = 50; productId < 100; productId++)
-        {
-            var productDto = new ProductDto(
-                Id: productId,
-                Name: "Krutoi Bober",
-                Price: 15.6m,
-                Weight: 12, 
-                Category: "Food",
-                ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
-                WarehouseId: 12345);
-            
-            _service.CreateProduct(productDto);
-        }
-
-        // Assert
-        var actual = _service.GetProductsFiltered(filters);
-        Assert.Equal(expected, actual);
-    }
-    
-    [Fact]
-    public void GetProductsFiltered_GetPage_ProductWarehouseIdFilter_AllProductsResult_Success()
-    {
-        // Arrange
-        var filters = new FiltersDto()
-        {
-            ProductWarehouseIdFilter = 123
-        };
-        var expected = new List<ProductDto>();
-        
-        // Act
-        for (long productId = 1; productId < 50; productId++)
-        {
-            var productDto = new ProductDto(
-                Id: productId,
-                Name: "Krutoi Bober",
-                Price: 15.6m,
-                Weight: 12, 
-                Category: "Food",
-                ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
-                WarehouseId: 123);
-                    
-            expected.Add(productDto);
-            _service.CreateProduct(productDto);
-        }
-        for (long productId = 50; productId < 100; productId++)
-        {
-            var productDto = new ProductDto(
-                Id: productId,
-                Name: "Krutoi Bober",
-                Price: 15.6m,
-                Weight: 12, 
-                Category: "Food",
-                ManufactureDate: DateOnly.FromDateTime(DateTime.Now), 
-                WarehouseId: 12345);
-                    
-            _service.CreateProduct(productDto);
-        }
-    
-        // Assert
-        var filteredResult = _service.GetProductsFiltered(filters);
-        var actual = _service.GetPage(1, 3, filteredResult);
-        Assert.Equal(expected.Take(3), actual);
+        return product;
     }
 }
